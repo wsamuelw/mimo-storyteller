@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>有声书片段生成器</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-content">
+        <h1>🎙️ 有声书片段生成器</h1>
+        <p class="subtitle">用 MiMo-V2.5-TTS 把文字变成多角色有声书</p>
+      </div>
+    </header>
+
+    <!-- API Key -->
+    <section class="card" id="apiSetup">
+      <h2>🔑 API 配置</h2>
+      <div class="input-group">
+        <label for="apiKey">MiMo API Key</label>
+        <div class="key-input-row">
+          <input type="password" id="apiKey" placeholder="输入你的 MiMo API Key" autocomplete="off">
+          <button class="btn btn-sm" onclick="toggleKeyVisibility()" title="显示/隐藏">👁</button>
+          <button class="btn btn-primary btn-sm" onclick="saveApiKey()">保存</button>
+        </div>
+        <p class="hint">Key 仅保存在浏览器 localStorage，不会上传</p>
+      </div>
+      <div class="input-group" style="margin-top: 12px;">
+        <label for="apiRegion">API 端点</label>
+        <select id="apiRegion" onchange="changeRegion()" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;">
+          <option value="standard">标准版 (api.xiaomimimo.com)</option>
+          <option value="cn">Token Plan 中国 (token-plan-cn)</option>
+          <option value="sgp">Token Plan 国际版 (token-plan-sgp)</option>
+        </select>
+        <p class="hint">Claude Code 用户选「国际版」，其他 Token Plan 用户选「中国」</p>
+      </div>
+      <div class="input-group" style="margin-top: 8px;">
+        <label for="customBase">自定义 Base URL（可选，覆盖上面的选择）</label>
+        <input type="url" id="customBase" placeholder="https://token-plan-sgp.xiaomimimo.com" oninput="saveCustomBase()">
+        <p class="hint">如果你的端点不在列表中，可以手动填写 base URL</p>
+      </div>
+      <div class="input-group" style="margin-top: 12px;">
+        <label for="proxyUrl">代理地址（可选，解决 CORS）</label>
+        <input type="url" id="proxyUrl" placeholder="https://your-worker.workers.dev">
+        <p class="hint">如果浏览器直接调用被 CORS 阻止，可填 Cloudflare Worker 代理地址</p>
+      </div>
+    </section>
+
+    <!-- Step 1 -->
+    <section class="card" id="step1">
+      <h2>📝 第一步：粘贴文本</h2>
+      <p class="section-desc">粘贴小说或故事片段，自动识别对话和旁白</p>
+      <textarea id="textInput" rows="10" placeholder="示例：&#10;&#10;老张推开吱呀作响的木门，看见小李正坐在窗边发呆。&#10;&#10;「你怎么来了？」小李抬起头，眼里带着几分惊讶。&#10;&#10;老张把手中的信封递过去：「你的信，从南方寄来的。」&#10;&#10;小李接过信封，手指微微发抖。「是……她的信？」"></textarea>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="segmentText()">✨ 智能分段</button>
+        <button class="btn" onclick="clearAll()">清空</button>
+      </div>
+    </section>
+
+    <!-- Step 2 -->
+    <section class="card hidden" id="step2">
+      <h2>🎭 第二步：分配角色声音</h2>
+      <p class="section-desc">为每个角色设计声音描述，旁白默认使用「沉稳旁白」</p>
+      <div id="charactersPanel"></div>
+      <details class="presets-section">
+        <summary>🎨 快速预设（点击展开）</summary>
+        <div class="preset-grid">
+          <button class="preset-btn" data-preset="narrator">📖 沉稳旁白</button>
+          <button class="preset-btn" data-preset="young-male">🧑 年轻男性</button>
+          <button class="preset-btn" data-preset="young-female">👩 年轻女性</button>
+          <button class="preset-btn" data-preset="elder-male">👴 老年男性</button>
+          <button class="preset-btn" data-preset="elder-female">👵 老年女性</button>
+          <button class="preset-btn" data-preset="child">🧒 童声</button>
+          <button class="preset-btn" data-preset="villain">😈 阴险反派</button>
+          <button class="preset-btn" data-preset="hero">🦸 磁性英雄</button>
+        </div>
+      </details>
+      <details class="segments-preview" open>
+        <summary>📋 分段预览（<span id="segmentCount">0</span> 段）</summary>
+        <div id="segmentsList"></div>
+      </details>
+      <div class="actions">
+        <button class="btn btn-primary btn-lg" onclick="generateAll()" id="generateBtn">🎵 生成全部音频</button>
+      </div>
+      <div class="hidden" id="progressArea">
+        <div class="progress-text" id="progressText">准备中...</div>
+        <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+      </div>
+    </section>
+
+    <!-- Step 3 -->
+    <section class="card hidden" id="step3">
+      <h2>🎧 第三步：试听与下载</h2>
+      <div class="player-controls">
+        <button class="btn btn-lg" onclick="playAll()" id="playAllBtn">▶ 播放全部</button>
+        <button class="btn btn-lg" onclick="pauseAll()">⏸ 暂停</button>
+        <button class="btn btn-lg" onclick="stopAll()">⏹ 停止</button>
+        <button class="btn btn-primary btn-lg" onclick="downloadAll()">💾 下载全部</button>
+      </div>
+      <div id="audioList"></div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
