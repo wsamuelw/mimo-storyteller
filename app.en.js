@@ -284,6 +284,17 @@ async function generateAll() {
 }
 
 async function callTTS(voiceDescription, text) {
+  // Detect dialect from voice description and prepend style tag
+  let dialect = '';
+  if (/粤语|cantonese/i.test(voiceDescription)) dialect = '粤语';
+  else if (/上海话|shanghainese/i.test(voiceDescription)) dialect = '上海话';
+  else if (/四川话|sichuan/i.test(voiceDescription)) dialect = '四川话';
+  else if (/东北话|dongbei/i.test(voiceDescription)) dialect = '东北话';
+  else if (/台湾话|taiwanese|hokkien/i.test(voiceDescription)) dialect = '台湾闽南话';
+  else if (/河南话|henan/i.test(voiceDescription)) dialect = '河南话';
+
+  const styledText = dialect ? `<style>${dialect}</style>${text}` : text;
+
   const url = state.proxyUrl
     ? state.proxyUrl.replace(/\/$/, '') + '/v1/chat/completions'
     : state.customBase
@@ -300,7 +311,7 @@ async function callTTS(voiceDescription, text) {
     model: 'mimo-v2.5-tts-voicedesign',
     messages: [
       { role: 'user', content: voiceDescription },
-      { role: 'assistant', content: text },
+      { role: 'assistant', content: styledText },
     ],
     audio: { format: 'wav' },
   };
