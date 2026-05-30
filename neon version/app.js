@@ -424,3 +424,15 @@ function triggerDownload(blob, filename) {
   a.click();
   URL.revokeObjectURL(a.href);
 }
+
+// --- Wire up the textarea auto-segment ---
+document.addEventListener('DOMContentLoaded', () => {
+  const textarea = document.getElementById('textInput');
+  let debounce;
+  textarea.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => {
+      if (textarea.value.trim().length > 20) segmentText();
+    }, 800);
+  });
+});
