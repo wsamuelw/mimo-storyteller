@@ -29,6 +29,8 @@ const PRESETS = {
   'child':       'A seven or eight year old child, high-pitched and crisp voice, slightly fast pace, full of curiosity and innocence.',
   'villain':     'A deep, sinister male voice, slow pace, cold tone, carrying a sense of pressure and menace.',
   'hero':        'A deep, magnetic male voice, steady and powerful pace, resolute tone, conveying safety and strength.',
+  'cantonese-m': 'A middle-aged male speaking Cantonese, steady voice, natural pace, like a local chatting in a tea house.',
+  'cantonese-f': 'A young female speaking Cantonese, gentle and bright voice, lively pace, like shopping at the market.',
 };
 
 // --- Init ---
