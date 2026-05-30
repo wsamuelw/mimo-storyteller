@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audiobook Snippet Generator</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-content">
+        <h1>🎙️ Audiobook Snippet Generator</h1>
+        <p class="subtitle">Turn text into multi-voice audiobooks with MiMo-V2.5-TTS</p>
+      <div class="lang-switch"><a href="index.html">中文 🇨🇳</a></div>
+      </div>
+    </header>
+
+    <!-- API Key -->
+    <section class="card" id="apiSetup">
+      <h2>🔑 API Configuration</h2>
+      <div class="input-group">
+        <label for="apiKey">MiMo API Key</label>
+        <div class="key-input-row">
+          <input type="password" id="apiKey" placeholder="Enter your MiMo API Key" autocomplete="off">
+          <button class="btn btn-sm" onclick="toggleKeyVisibility()" title="Show/Hide">👁</button>
+          <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Save</button>
+        </div>
+        <p class="hint">Key is stored in browser localStorage only — never uploaded</p>
+      </div>
+      <div class="input-group" style="margin-top: 12px;">
+        <label for="apiRegion">API Endpoint</label>
+        <select id="apiRegion" onchange="changeRegion()" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;">
+          <option value="standard">Standard (api.xiaomimimo.com)</option>
+          <option value="cn">Token Plan China (token-plan-cn)</option>
+          <option value="sgp">Token Plan International (token-plan-sgp)</option>
+        </select>
+        <p class="hint">Claude Code users select "International". Other Token Plan users select "China"</p>
+      </div>
+      <div class="input-group" style="margin-top: 8px;">
+        <label for="customBase">Custom Base URL (optional, overrides above)</label>
+        <input type="url" id="customBase" placeholder="https://token-plan-sgp.xiaomimimo.com" oninput="saveCustomBase()">
+        <p class="hint">Enter manually if your endpoint is not in the list</p>
+      </div>
+      <div class="input-group" style="margin-top: 8px;">
+        <label for="proxyUrl">Proxy URL (optional, for CORS)</label>
+        <input type="url" id="proxyUrl" placeholder="https://your-worker.workers.dev">
+        <p class="hint">Fill in a Cloudflare Worker proxy if browser calls are blocked by CORS</p>
+      </div>
+    </section>
+
+    <!-- Step 1 -->
+    <section class="card" id="step1">
+      <h2>📝 Step 1: Paste Your Text</h2>
+      <p class="section-desc">Paste a novel or story snippet. Dialogue in 「」or "" will be auto-detected.</p>
+      <textarea id="textInput" rows="10" placeholder="Example:
+
+Old Zhang pushed open the creaking wooden door and saw Little Li sitting by the window, lost in thought.
+
+「What are you doing here?」Little Li looked up, a hint of surprise in his eyes.
+
+Old Zhang handed over the envelope: «Your letter. It came from the south.»
+
+Little Li took the envelope, fingers trembling slightly. «Is... it from her?»
+
+«Yes.» Old Zhang turned to leave, but stopped at the door. «When you're done, come out for some tea.»"></textarea>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="segmentText()">✨ Auto-Segment</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </section>
+
+    <!-- Step 2 -->
+    <section class="card hidden" id="step2">
+      <h2>🎭 Step 2: Assign Character Voices</h2>
+      <p class="section-desc">Design a voice for each character. Narrator defaults to "Calm Narrator".</p>
+      <div id="charactersPanel"></div>
+      <details class="presets-section">
+        <summary>🎨 Quick Presets (click to expand)</summary>
+        <div class="preset-grid">
+          <button class="preset-btn" data-preset="narrator">📖 Calm Narrator</button>
+          <button class="preset-btn" data-preset="young-male">🧑 Young Male</button>
+          <button class="preset-btn" data-preset="young-female">👩 Young Female</button>
+          <button class="preset-btn" data-preset="elder-male">👴 Elderly Male</button>
+          <button class="preset-btn" data-preset="elder-female">👵 Elderly Female</button>
+          <button class="preset-btn" data-preset="child">🧒 Child</button>
+          <button class="preset-btn" data-preset="villain">😈 Sinister Villain</button>
+          <button class="preset-btn" data-preset="hero">🦸 Magnetic Hero</button>
+        </div>
+      </details>
+      <details class="segments-preview" open>
+        <summary>📋 Segment Preview (<span id="segmentCount">0</span> segments)</summary>
+        <div id="segmentsList"></div>
+      </details>
+      <div class="actions">
+        <button class="btn btn-primary btn-lg" onclick="generateAll()" id="generateBtn">🎵 Generate All Audio</button>
+      </div>
+      <div class="hidden" id="progressArea">
+        <div class="progress-text" id="progressText">Preparing...</div>
+        <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+      </div>
+    </section>
+
+    <!-- Step 3 -->
+    <section class="card hidden" id="step3">
+      <h2>🎧 Step 3: Listen & Download</h2>
+      <div class="player-controls">
+        <button class="btn btn-lg" onclick="playAll()" id="playAllBtn">▶ Play All</button>
+        <button class="btn btn-lg" onclick="pauseAll()">⏸ Pause</button>
+        <button class="btn btn-lg" onclick="stopAll()">⏹ Stop</button>
+        <button class="btn btn-primary btn-lg" onclick="downloadAll()">💾 Download All</button>
+      </div>
+      <div id="audioList"></div>
+    </section>
+  </div>
+
+  <script src="app.en.js"></script>
+</body>
+</html>
