@@ -8,7 +8,7 @@ const API_TOKEN_PLAN_SGP = 'https://token-plan-sgp.xiaomimimo.com/v1/chat/comple
 
 // --- State ---
 let state = {
-  apiRegion: localStorage.getItem('mimo_api_region') || 'standard',
+  apiRegion: localStorage.getItem('mimo_api_region') || 'sgp',
   customBase: localStorage.getItem('mimo_custom_base') || '',
   apiKey: localStorage.getItem('mimo_api_key') || '',
   proxyUrl: localStorage.getItem('mimo_proxy_url') || '',
