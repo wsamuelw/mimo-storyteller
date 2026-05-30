@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>有声书片段生成器</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+</head>
+<body>
+
+<div class="app">
+  <header class="header">
+    <h1>🎙️ 有声书片段生成器</h1>
+    <p>MiMo-V2.5-TTS · Voice Design</p>
+  </header>
+
+  <!-- Config -->
+  <div class="config-bar">
+    <div class="glass">
+      <label>API Key</label>
+      <input type="password" id="apiKey" placeholder="tp-xxxxxxxxxx" autocomplete="off">
+    </div>
+    <div class="glass">
+      <label>Endpoint</label>
+      <select id="apiRegion" onchange="changeRegion()">
+        <option value="standard">Standard</option>
+        <option value="cn">Token Plan CN</option>
+        <option value="sgp">Token Plan SGP</option>
+      </select>
+    </div>
+    <div class="glass">
+      <label>Custom Base URL</label>
+      <input type="url" id="customBase" placeholder="https://token-plan-sgp.xiaomimimo.com" oninput="saveCustomBase()">
+    </div>
+    <div class="glass">
+      <label>Proxy (CORS)</label>
+      <input type="url" id="proxyUrl" placeholder="https://worker.dev">
+    </div>
+    <div class="glass" style="display:flex;align-items:flex-end">
+      <button class="btn-neon" onclick="saveApiKey()" style="width:100%">Save Key</button>
+    </div>
+  </div>
+
+  <!-- Step 1: Text Input -->
+  <div class="text-area glass glass-glow">
+    <div class="text-area-header"><h3>📝 Source Text</h3><span>auto-segment on paste</span></div>
+    <textarea id="textInput" placeholder="粘贴小说或故事片段...&#10;&#10;支持「」和 "" 标记的对话，自动识别旁白与角色。"></textarea>
+  </div>
+
+  <!-- Step 2: Characters -->
+  <div class="char-section hidden" id="step2">
+    <div class="section-label">🎭 Characters</div>
+    <div class="char-grid" id="charactersPanel"></div>
+    <div class="preset-bar">
+      <button class="preset-btn active" data-preset="narrator">📖 沉稳旁白</button>
+      <button class="preset-btn" data-preset="young-male">🧑 年轻男性</button>
+      <button class="preset-btn" data-preset="young-female">👩 年轻女性</button>
+      <button class="preset-btn" data-preset="elder-male">👴 老年男性</button>
+      <button class="preset-btn" data-preset="elder-female">👵 老年女性</button>
+      <button class="preset-btn" data-preset="child">🧒 童声</button>
+      <button class="preset-btn" data-preset="villain">😈 反派</button>
+      <button class="preset-btn" data-preset="hero">🦸 英雄</button>
+    </div>
+  </div>
+
+  <!-- Segment Preview -->
+  <div class="hidden" id="segmentPreview">
+    <div class="section-label">📋 Segments (<span id="segmentCount">0</span>)</div>
+    <div class="segments" id="segmentsList"></div>
+  </div>
+
+  <!-- Generate Button -->
+  <div class="gen-row hidden" id="actionRow">
+    <button class="gen-btn" onclick="generateAll()" id="generateBtn">🎵 生成全部音频</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="hidden" id="progressArea">
+    <div class="progress-text" id="progressText">Preparing...</div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <!-- Step 3: Player -->
+  <div class="player-section hidden" id="step3">
+    <div class="section-label">🎧 Playback</div>
+    <div class="glass glass-glow" style="padding:16px">
+      <div class="player-controls">
+        <div class="transport">
+          <button onclick="playAll()">▶</button>
+          <button onclick="pauseAll()">⏸</button>
+          <button onclick="stopAll()">⏹</button>
+        </div>
+        <button class="dl-btn" onclick="downloadAll()">💾 下载全部</button>
+      </div>
+      <div class="segments" id="audioList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
