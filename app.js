@@ -29,8 +29,6 @@ const PRESETS = {
   'child':       '一个七八岁的小孩，声音稚嫩清脆，语速稍快，充满好奇和天真。',
   'villain':     '一个阴险低沉的男性声音，语速缓慢，语气冰冷，带着压迫感和威胁。',
   'hero':        '一个磁性浑厚的男性声音，语速沉稳有力，语气坚定，给人安全感。',
-  'cantonese-m': '一个讲粤语的中年男性，声音沉稳，语速自然，像老广喺茶楼倾偈。',
-  'cantonese-f': '一个讲粤语的年轻女性，声音温柔明亮，语速轻快，像喺街市买嘢。',
 };
 
 // --- Init ---
@@ -290,17 +288,6 @@ async function generateAll() {
 }
 
 async function callTTS(voiceDescription, text) {
-  // Detect dialect from voice description and prepend style tag
-  let dialect = '';
-  if (/粤语|cantonese/i.test(voiceDescription)) dialect = '粤语';
-  else if (/上海话|shanghainese/i.test(voiceDescription)) dialect = '上海话';
-  else if (/四川话|sichuan/i.test(voiceDescription)) dialect = '四川话';
-  else if (/东北话|dongbei/i.test(voiceDescription)) dialect = '东北话';
-  else if (/台湾话|taiwanese|hokkien/i.test(voiceDescription)) dialect = '台湾闽南话';
-  else if (/河南话|henan/i.test(voiceDescription)) dialect = '河南话';
-
-  const styledText = dialect ? `<style>${dialect}</style>${text}` : text;
-
   const url = state.proxyUrl
     ? state.proxyUrl.replace(/\/$/, '') + '/v1/chat/completions'
     : state.customBase
@@ -313,25 +300,14 @@ async function callTTS(voiceDescription, text) {
     'api-key': state.apiKey,
   };
 
-  // Use base TTS model for dialects (style tags work better), voice design for others
-  const useBaseModel = dialect !== '';
-  const payload = useBaseModel
-    ? {
-        model: 'mimo-v2.5-tts',
-        messages: [
-          { role: 'user', content: '请朗读' },
-          { role: 'assistant', content: styledText },
-        ],
-        audio: { format: 'wav', voice: 'mimo_default' },
-      }
-    : {
-        model: 'mimo-v2.5-tts-voicedesign',
-        messages: [
-          { role: 'user', content: voiceDescription },
-          { role: 'assistant', content: text },
-        ],
-        audio: { format: 'wav' },
-      };
+  const payload = {
+    model: 'mimo-v2.5-tts-voicedesign',
+    messages: [
+      { role: 'user', content: voiceDescription },
+      { role: 'assistant', content: text },
+    ],
+    audio: { format: 'wav' },
+  };
 
   const resp = await fetch(url, {
     method: 'POST',
