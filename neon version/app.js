@@ -119,25 +119,76 @@ function segmentText() {
 
   let buffer = '';
   let lastSpeaker = null;
+  let lastMaleSpeaker = null;
+  let lastFemaleSpeaker = null;
+
+  // Pre-scan: discover character names from Name：patterns and repeated names
+  const knownChars = new Set();
+  const maleChars = new Set();
+  const femaleChars = new Set();
+
+  // First pass: find all Name：patterns
+  for (const line of lines) {
+    const m = line.trim().match(/^([一-鿿]{2,4})[：:]/);
+    if (m) knownChars.add(m[1]);
+  }
+  // Second pass: find names that appear 3+ times (likely characters)
+  const nameCounts = {};
+  for (const line of lines) {
+    const matches = line.match(/[一-鿿]{2,4}/g) || [];
+    for (const w of matches) {
+      if (!/的|了|在|是|有|和|与|或|但|而|却|就|也|还|都|很|不|没|这|那|他|她|它|我|你|们|吗|呢|吧|啊|呀|哦|哈|嗯|喂|唉/.test(w)) {
+        nameCounts[w] = (nameCounts[w] || 0) + 1;
+      }
+    }
+  }
+  for (const [word, count] of Object.entries(nameCounts)) {
+    if (count >= 3 && word.length >= 2 && word.length <= 4) knownChars.add(word);
+  }
+
+  function registerChar(name, gender) {
+    knownChars.add(name);
+    if (gender === 'm') maleChars.add(name);
+    else if (gender === 'f') femaleChars.add(name);
+  }
+
+  function resolveFromNarration(text) {
+    // Check known chars
+    for (const ch of knownChars) {
+      if (text.startsWith(ch)) return ch;
+    }
+    // Chinese dialogue tags with known char
+    const tagMatch = text.match(/^([一-鿿]{2,4})[说问道答喊叫冷笑苦笑低声高声淡淡沉声幽幽喃喃厉声哽咽颤抖温柔冷冷]{0,4}[说问道]/);
+    if (tagMatch && knownChars.has(tagMatch[1])) return tagMatch[1];
+    // Pronouns
+    if (/^她/.test(text)) return lastSpeaker || '未知女';
+    if (/^他/.test(text)) return lastSpeaker || '未知男';
+    // English name + tag
+    const engTag = text.match(/^([A-Za-z][A-Za-z ]{0,15})\s+(said|asked|whispered|replied|shouted|muttered|called|exclaimed|answered)/i);
+    if (engTag) return engTag[1].trim();
+    return null;
+  }
 
   for (const line of lines) {
     const trimmed = line.trim();
 
-    // Pattern: Name：text
-    const nameColonMatch = trimmed.match(/^([\u4e00-\u9fff]{2,3})[：:]\s*(.+)$/);
+    // Skip scene markers
+    if (/^[【\[][^】\]]*[】\]]$|^[-*]{3,}$|^—{3,}$/.test(trimmed)) continue;
 
+    // Pattern 1: Name：text (strict: 2-4 Chinese chars or known English name)
+    const nameColonMatch = trimmed.match(/^([一-鿿]{2,4})[：:]\s*(.+)$/);
     if (nameColonMatch) {
-      if (buffer.trim()) {
-        segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
-        buffer = '';
-      }
-      lastSpeaker = nameColonMatch[1].trim();
-      segments.push({ idx: segments.length + 1, type: 'dialogue', speaker: lastSpeaker, text: nameColonMatch[2].trim() });
+      const name = nameColonMatch[1].trim();
+      registerChar(name, null);
+      flushBuffer();
+      lastSpeaker = name;
+      segments.push({ idx: segments.length + 1, type: 'dialogue', speaker: name, text: nameColonMatch[2].trim() });
       continue;
     }
 
-    if (/"\u201c|\u201d|\u300c|\u300d/.test(trimmed)) {
-      const re = /[\u201c\u300c"](.*?)[\u201d\u300d"]/g;
+    // Pattern 2: Contains quotes
+    if (/["「『'"]/.test(trimmed)) {
+      const re = /["「『'"](.*?)["」』'"]/g;
       let m, lastIdx = 0;
       const lineParts = [];
 
@@ -154,46 +205,48 @@ function segmentText() {
         if (remaining) lineParts.push({ type: 'narration', text: remaining });
       }
 
-      // Pass 1: scan ALL narration for speaker hints
+      // Queue-based: emit dialogue when narration updates speaker
       let resolvedSpeaker = lastSpeaker;
+      const pendingDialogues = [];
       for (const part of lineParts) {
         if (part.type === 'narration') {
-          const nameInNarr = part.text.match(/^(林轩|苏瑶)/);
-          if (nameInNarr) resolvedSpeaker = nameInNarr[1];
-          const pronoun = part.text.match(/^(她|他)/);
-          if (pronoun) {
-            if (pronoun[1] === '她') resolvedSpeaker = '苏瑶';
-            else if (pronoun[1] === '他') resolvedSpeaker = '林轩';
+          // Flush pending dialogue with CURRENT speaker
+          while (pendingDialogues.length > 0) {
+            const d = pendingDialogues.shift();
+            if (buffer.trim()) {
+              segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
+              buffer = '';
+            }
+            segments.push({ idx: segments.length + 1, type: 'dialogue', speaker: resolvedSpeaker || lastSpeaker || '未知', text: d });
           }
-          const colonMatch = part.text.match(/^([\u4e00-\u9fff]{2,3})[\u4e00-\u9fff]*?[：:]/);
-          if (colonMatch) resolvedSpeaker = colonMatch[1];
-        }
-      }
-
-      // Pass 2: emit narration, then dialogue with resolved speaker
-      for (const part of lineParts) {
-        if (part.type === 'narration') {
+          // Update speaker from this narration
           if (buffer.trim()) {
             segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
             buffer = '';
           }
           buffer = part.text;
+          const hint = resolveFromNarration(part.text);
+          if (hint) resolvedSpeaker = hint;
         } else {
-          if (buffer.trim()) {
-            segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
-            buffer = '';
-          }
-          segments.push({ idx: segments.length + 1, type: 'dialogue', speaker: resolvedSpeaker || '未知', text: part.text });
+          pendingDialogues.push(part.text);
         }
       }
-      lastSpeaker = resolvedSpeaker || lastSpeaker;
-    } else {
-      const pronoun = trimmed.match(/^(她|他|苏瑶|林轩)/);
-      if (pronoun) {
-        if (pronoun[1] === '她') lastSpeaker = lastSpeaker || '苏瑶';
-        else if (pronoun[1] === '他') lastSpeaker = lastSpeaker || '林轩';
-        else lastSpeaker = pronoun[1];
+      // Flush remaining dialogue
+      while (pendingDialogues.length > 0) {
+        const d = pendingDialogues.shift();
+        if (buffer.trim()) {
+          segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
+          buffer = '';
+        }
+        segments.push({ idx: segments.length + 1, type: 'dialogue', speaker: resolvedSpeaker || lastSpeaker || '未知', text: d });
       }
+      lastSpeaker = resolvedSpeaker || lastSpeaker;
+      // Track gender
+      // Also check if speaker is a known character — infer gender from context
+    } else {
+      // Pure narration — detect speaker for next line
+      const hint = resolveFromNarration(trimmed);
+      if (hint && knownChars.has(hint)) lastSpeaker = hint;
       buffer += (buffer ? '\n' : '') + trimmed;
     }
   }  if (buffer.trim()) {
