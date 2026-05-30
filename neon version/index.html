@@ -43,6 +43,16 @@
     </div>
   </div>
 
+  <!-- AI Story Generator -->
+  <div class="glass glass-glow" style="margin-bottom:20px">
+    <div class="text-area-header"><h3>🤖 AI 写故事</h3><span>用 MiMo LLM 生成故事</span></div>
+    <input type="text" id="storyPrompt" class="input-field" placeholder="输入故事主题或提示词，例如：两个老朋友在咖啡馆重逢" style="width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none;margin-bottom:8px">
+    <div style="display:flex;gap:8px">
+      <button class="btn-neon" onclick="generateStory()" id="storyBtn">✨ AI 写故事</button>
+      <span id="storyStatus" style="font-size:11px;color:var(--text-dim);align-self:center"></span>
+    </div>
+  </div>
+
   <!-- Step 1: Text Input -->
   <div class="text-area glass glass-glow">
     <div class="text-area-header"><h3>📝 Source Text</h3><span>auto-segment on paste</span></div>

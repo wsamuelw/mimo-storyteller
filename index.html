@@ -49,6 +49,19 @@
       </div>
     </section>
 
+    <!-- AI Story Generator -->
+    <section class="card glass-glow">
+      <h2>🤖 AI 写故事</h2>
+      <p class="section-desc">用 MiMo LLM 生成故事，自动分段</p>
+      <div class="input-group">
+        <input type="text" id="storyPrompt" placeholder="输入故事主题，例如：两个老朋友在咖啡馆重逢" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;font-family:inherit;outline:none">
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="generateStory()" id="storyBtn">✨ AI 写故事</button>
+        <span id="storyStatus" style="font-size:12px;color:var(--text-dim)"></span>
+      </div>
+    </section>
+
     <!-- Step 1 -->
     <section class="card" id="step1">
       <h2>📝 第一步：粘贴文本</h2>

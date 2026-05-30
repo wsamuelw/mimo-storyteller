@@ -369,6 +369,76 @@ function base64ToBlob(b64, mime) {
   return new Blob([arr], { type: mime });
 }
 
+// --- AI Story Generation ---
+async function generateStory() {
+  const prompt = document.getElementById('storyPrompt').value.trim();
+  if (!prompt) return alert('请输入故事主题');
+  if (!state.apiKey) return alert('请先保存 API Key');
+
+  const btn = document.getElementById('storyBtn');
+  const status = document.getElementById('storyStatus');
+  btn.disabled = true;
+  btn.textContent = '⏳ 生成中...';
+  status.textContent = '正在调用 MiMo LLM...';
+
+  const url = state.proxyUrl
+    ? state.proxyUrl.replace(/\/$/, '') + '/v1/chat/completions'
+    : state.customBase
+      ? state.customBase.replace(/\/$/, '') + '/v1/chat/completions'
+      : state.apiRegion === 'cn' ? API_TOKEN_PLAN_CN
+      : state.apiRegion === 'sgp' ? API_TOKEN_PLAN_SGP
+      : API_STANDARD;
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${state.apiKey}`,
+    'api-key': state.apiKey,
+  };
+
+  const storyPrompt = `你是一个专业的故事作家。请根据以下主题写一个短篇故事，要求：
+1. 故事有2-4个角色
+2. 对话用 Name: text 格式（例如 Daniel: Hello!）
+3. 旁白用普通段落
+4. 故事长度200-400字
+5. 有完整的情节：开头、发展、结尾
+6. 直接输出故事，不要任何解释或标题
+
+主题：${prompt}`;
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: 'mimo-v2.5-pro',
+        messages: [{ role: 'user', content: storyPrompt }],
+        temperature: 0.8,
+      }),
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text().catch(() => 'Unknown error');
+      throw new Error(`HTTP ${resp.status}: ${errText.substring(0, 300)}`);
+    }
+
+    const data = await resp.json();
+    const story = data?.choices?.[0]?.message?.content;
+    if (!story) throw new Error('No story content in response');
+
+    document.getElementById('textInput').value = story;
+    status.textContent = '✅ 故事生成完成，正在分段...';
+    segmentText();
+    status.textContent = '✅ 故事已分段，请分配角色声音';
+
+  } catch (e) {
+    console.error('Story generation failed:', e);
+    status.textContent = '❌ 生成失败: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✨ AI 写故事';
+  }
+}
+
 // --- Render Step 3 ---
 function renderStep3() {
   document.getElementById('step3').classList.remove('hidden');
