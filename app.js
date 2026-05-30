@@ -95,12 +95,15 @@ function segmentText() {
 
   for (const line of lines) {
     const trimmed = line.trim();
-    // Check for dialogue: 「...」 or "..."
+
+    // Pattern 1: 「...」 or "..." at start (Chinese dialogue)
     const dialogueMatch = trimmed.match(/^["「](.+?)["」][:：]?\s*(.*)$/);
+    // Pattern 2: Speaker before quotes: Name：「text」
     const dialogueInline = trimmed.match(/^(.+?)[:：]\s*["「](.+?)["」]/);
+    // Pattern 3: Name: text (English dialogue, e.g. "Daniel: I like lego")
+    const nameColonMatch = trimmed.match(/^([A-Za-z\u4e00-\u9fff][A-Za-z\u4e00-\u9fff\s]{0,20})[:：]\s+(.+)$/);
 
     if (dialogueMatch) {
-      // Flush narration buffer
       if (buffer.trim()) {
         segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
         buffer = '';
@@ -116,6 +119,15 @@ function segmentText() {
       }
       const speaker = dialogueInline[1].trim();
       const text = dialogueInline[2];
+      lastSpeaker = speaker;
+      segments.push({ idx: segments.length + 1, type: 'dialogue', speaker, text });
+    } else if (nameColonMatch) {
+      if (buffer.trim()) {
+        segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
+        buffer = '';
+      }
+      const speaker = nameColonMatch[1].trim();
+      const text = nameColonMatch[2].trim();
       lastSpeaker = speaker;
       segments.push({ idx: segments.length + 1, type: 'dialogue', speaker, text });
     } else {
