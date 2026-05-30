@@ -57,6 +57,9 @@ const PRESETS = {
 
 // --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
+  // Init language
+  setLang(currentLang);
+
   if (state.apiKey) document.getElementById('apiKey').value = state.apiKey;
   if (state.proxyUrl) document.getElementById('proxyUrl').value = state.proxyUrl;
   document.getElementById('apiRegion').value = state.apiRegion;
@@ -87,10 +90,10 @@ function saveCustomBase() {
 
 function saveApiKey() {
   const key = document.getElementById('apiKey').value.trim();
-  if (!key) return alert('请输入 API Key');
+  if (!key) return alert(t('enterApiKey'));
   state.apiKey = key;
   localStorage.setItem('mimo_api_key', key);
-  alert('✅ API Key 已保存');
+  alert('✅ API Key saved');
 }
 
 // --- Proxy ---
@@ -108,7 +111,7 @@ function closeModal() {
 // --- Text Segmentation ---
 function segmentText() {
   const raw = document.getElementById('textInput').value.trim();
-  if (!raw) return alert('请先粘贴文本');
+  if (!raw) return alert(t('enterTextFirst'));
 
   const segments = [];
   // Split by lines, keep non-empty
@@ -269,13 +272,13 @@ function clearAll() {
 
 // --- Audio Generation ---
 async function generateAll() {
-  if (!state.apiKey) return alert('请先保存 API Key');
-  if (!state.segments.length) return alert('请先分段文本');
+  if (!state.apiKey) return alert(t('enterApiKey'));
+  if (!state.segments.length) return alert(t('enterTextFirst'));
 
   // Validate all characters have descriptions
   for (const [name, char] of Object.entries(state.characters)) {
     if (!char.desc.trim()) {
-      return alert(`请为「${name}」填写声音描述`);
+      return alert(t('fillVoiceDesc', name));
     }
   }
 
@@ -311,12 +314,12 @@ async function generateAll() {
 
   document.getElementById('progressFill').style.width = '100%';
   document.getElementById('progressText').textContent =
-    errors.length ? `完成，${errors.length} 个失败` : `✅ 全部 ${total} 段生成完成`;
+    errors.length ? t('doneWithErrors', errors.length) : t('done', total);
 
   btn.disabled = false;
 
   if (errors.length) {
-    alert('部分段落生成失败：\n' + errors.join('\n'));
+    alert(t('errorsTitle') + '\n' + errors.join('\n'));
   }
 
   if (Object.keys(state.audioBuffers).length > 0) {
@@ -373,14 +376,14 @@ function base64ToBlob(b64, mime) {
 // --- AI Story Generation ---
 async function generateStory() {
   const prompt = document.getElementById('storyPrompt').value.trim();
-  if (!prompt) return alert('请输入故事主题或提示词');
-  if (!state.apiKey) return alert('请先保存 API Key');
+  if (!prompt) return alert(t('enterStoryPrompt'));
+  if (!state.apiKey) return alert(t('enterApiKey'));
 
   const btn = document.getElementById('storyBtn');
   const status = document.getElementById('storyStatus');
   btn.disabled = true;
   btn.textContent = '⏳ 生成中...';
-  status.textContent = '正在调用 MiMo LLM...';
+  status.textContent = t('storyGenerating');
 
   const url = state.proxyUrl
     ? state.proxyUrl.replace(/\/$/, '') + '/v1/chat/completions'
@@ -428,13 +431,13 @@ async function generateStory() {
 
     // Put story in textarea and auto-segment
     document.getElementById('textInput').value = story;
-    status.textContent = '✅ 故事生成完成，正在分段...';
+    status.textContent = t('storyDone');
     segmentText();
-    status.textContent = '✅ 故事已分段，请分配角色声音';
+    status.textContent = t('storySegmented');
 
   } catch (e) {
     console.error('Story generation failed:', e);
-    status.textContent = '❌ 生成失败: ' + e.message;
+    status.textContent = t('storyFailed', e.message);
   } finally {
     btn.disabled = false;
     btn.textContent = '✨ AI 写故事';
@@ -516,7 +519,7 @@ function downloadAll() {
     .filter(s => state.audioBuffers[s.idx])
     .map(s => ({ seg: s, buf: state.audioBuffers[s.idx] }));
 
-  if (!buffers.length) return alert('没有可下载的音频');
+  if (!buffers.length) return alert(t('noAudio'));
 
   // Download individually (browser can't merge WAV without a library)
   for (const { seg, buf } of buffers) {

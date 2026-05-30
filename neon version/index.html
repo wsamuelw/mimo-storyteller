@@ -12,18 +12,23 @@
 
 <div class="app">
   <header class="header">
-    <h1>🎙️ 有声书片段生成器</h1>
+    <h1 data-i18n="title">🎙️ 有声书片段生成器</h1>
     <p>MiMo-V2.5-TTS · Voice Design</p>
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="zh-CN" onclick="setLang('zh-CN')">简体</button>
+      <button class="lang-btn" data-lang="zh-TW" onclick="setLang('zh-TW')">繁體</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+    </div>
   </header>
 
   <!-- Config -->
   <div class="config-bar">
     <div class="glass">
-      <label>API Key</label>
+      <label data-i18n="apiKeyLabel">API Key</label>
       <input type="password" id="apiKey" placeholder="tp-xxxxxxxxxx" autocomplete="off">
     </div>
     <div class="glass">
-      <label>Endpoint</label>
+      <label data-i18n="endpointLabel">Endpoint</label>
       <select id="apiRegion" onchange="changeRegion()">
         <option value="standard">Standard / PAYG</option>
         <option value="cn">Token Plan CN</option>
@@ -31,42 +36,42 @@
       </select>
     </div>
     <div class="glass">
-      <label>Custom Base URL</label>
+      <label data-i18n="customBaseLabel">Custom Base URL</label>
       <input type="url" id="customBase" placeholder="https://token-plan-sgp.xiaomimimo.com" oninput="saveCustomBase()">
     </div>
     <div class="glass">
-      <label>Proxy (CORS)</label>
+      <label data-i18n="proxyLabel">Proxy (CORS)</label>
       <input type="url" id="proxyUrl" placeholder="https://worker.dev">
     </div>
     <div class="glass" style="display:flex;align-items:flex-end">
-      <button class="btn-neon" onclick="saveApiKey()" style="width:100%">Save Key</button>
+      <button class="btn-neon" onclick="saveApiKey()" style="width:100%" data-i18n="saveKey">Save Key</button>
     </div>
   </div>
 
   <!-- AI Story Generator -->
   <div class="glass glass-glow" style="margin-bottom:20px">
-    <div class="text-area-header"><h3>🤖 AI 写故事</h3><span>用 MiMo LLM 生成故事</span></div>
-    <input type="text" id="storyPrompt" class="input-field" placeholder="输入故事主题或提示词，例如：两个老朋友在咖啡馆重逢" style="width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none;margin-bottom:8px">
+    <div class="text-area-header"><h3 data-i18n="aiStoryTitle">🤖 AI 写故事</h3><span data-i18n="aiStoryDesc">用 MiMo LLM 生成故事</span></div>
+    <input type="text" id="storyPrompt" class="input-field" data-i18n-placeholder="storyPlaceholder" placeholder="输入故事主题或提示词，例如：两个老朋友在咖啡馆重逢" style="width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none;margin-bottom:8px">
     <div style="display:flex;gap:8px">
-      <button class="btn-neon" onclick="generateStory()" id="storyBtn">✨ AI 写故事</button>
+      <button class="btn-neon" onclick="generateStory()" id="storyBtn" data-i18n="aiStoryBtn">✨ AI 写故事</button>
       <span id="storyStatus" style="font-size:11px;color:var(--text-dim);align-self:center"></span>
     </div>
   </div>
 
   <!-- Step 1: Text Input -->
   <div class="text-area glass glass-glow">
-    <div class="text-area-header"><h3>📝 Source Text</h3><span>auto-segment on paste</span></div>
-    <textarea id="textInput" rows="10" placeholder="粘贴小说或故事片段...&#10;&#10;支持「」和 "" 标记的对话，自动识别旁白与角色。"></textarea>
+    <div class="text-area-header"><h3 data-i18n="sourceText">📝 Source Text</h3><span data-i18n="autoSegmentHint">auto-segment on paste</span></div>
+    <textarea id="textInput" rows="10" data-i18n-placeholder="textInputPlaceholder" placeholder="粘贴小说或故事片段...&#10;&#10;支持「」和 "" 标记的对话，自动识别旁白与角色。"></textarea>
     <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn-neon" onclick="segmentText()">✨ 智能分段</button>
-      <button class="btn-neon" onclick="clearAll()" style="border-color:var(--border);color:var(--text-dim);background:var(--surface)">清空</button>
+      <button class="btn-neon" onclick="segmentText()" data-i18n="segmentBtn">✨ 智能分段</button>
+      <button class="btn-neon" onclick="clearAll()" style="border-color:var(--border);color:var(--text-dim);background:var(--surface)" data-i18n="clearBtn">清空</button>
     </div>
   </div>
 
   <!-- Step 2: Characters + Segments + Generate + Progress (ALL inside step2) -->
   <div class="hidden" id="step2">
     <div class="char-section">
-      <div class="section-label">🎭 Characters</div>
+      <div class="section-label" data-i18n="charactersLabel">🎭 Characters</div>
       <div class="char-grid" id="charactersPanel"></div>
       <div class="preset-bar">
         <button class="preset-btn active" data-preset="narrator">📖 旁白</button>
@@ -105,12 +110,12 @@
     </div>
 
     <!-- Segment Preview -->
-    <div class="section-label" style="margin-top:20px">📋 Segments (<span id="segmentCount">0</span>)</div>
+    <div class="section-label" style="margin-top:20px" data-i18n="segmentsLabel">📋 Segments (<span id="segmentCount">0</span>)</div>
     <div class="segments" id="segmentsList"></div>
 
     <!-- Generate Button -->
     <div class="gen-row" style="margin-top:16px">
-      <button class="gen-btn" onclick="generateAll()" id="generateBtn">🎵 生成全部音频</button>
+      <button class="gen-btn" onclick="generateAll()" id="generateBtn" data-i18n="generateBtn">🎵 生成全部音频</button>
     </div>
 
     <!-- Progress -->
@@ -122,7 +127,7 @@
 
   <!-- Step 3: Player -->
   <div class="player-section hidden" id="step3">
-    <div class="section-label">🎧 Playback</div>
+    <div class="section-label" data-i18n="playbackLabel">🎧 Playback</div>
     <div class="glass glass-glow" style="padding:16px">
       <div class="player-controls">
         <div class="transport">
@@ -130,13 +135,14 @@
           <button onclick="pauseAll()">⏸</button>
           <button onclick="stopAll()">⏹</button>
         </div>
-        <button class="dl-btn" onclick="downloadAll()">💾 下载全部</button>
+        <button class="dl-btn" onclick="downloadAll()" data-i18n="downloadAllBtn">💾 下载全部</button>
       </div>
       <div class="segments" id="audioList"></div>
     </div>
   </div>
 </div>
 
+<script src="i18n.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
