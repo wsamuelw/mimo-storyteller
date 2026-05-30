@@ -313,14 +313,25 @@ async function callTTS(voiceDescription, text) {
     'api-key': state.apiKey,
   };
 
-  const payload = {
-    model: 'mimo-v2.5-tts-voicedesign',
-    messages: [
-      { role: 'user', content: voiceDescription },
-      { role: 'assistant', content: styledText },
-    ],
-    audio: { format: 'wav' },
-  };
+  // Use base TTS model for dialects (style tags work better), voice design for others
+  const useBaseModel = dialect !== '';
+  const payload = useBaseModel
+    ? {
+        model: 'mimo-v2.5-tts',
+        messages: [
+          { role: 'user', content: '请朗读' },
+          { role: 'assistant', content: styledText },
+        ],
+        audio: { format: 'wav', voice: 'mimo_default' },
+      }
+    : {
+        model: 'mimo-v2.5-tts-voicedesign',
+        messages: [
+          { role: 'user', content: voiceDescription },
+          { role: 'assistant', content: text },
+        ],
+        audio: { format: 'wav' },
+      };
 
   const resp = await fetch(url, {
     method: 'POST',
