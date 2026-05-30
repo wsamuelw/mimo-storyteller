@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (state.proxyUrl) document.getElementById('proxyUrl').value = state.proxyUrl;
   document.getElementById('apiRegion').value = state.apiRegion;
   if (state.customBase) document.getElementById('customBase').value = state.customBase;
-  document.querySelectorAll('.preset-pill').forEach(btn => {
+  document.querySelectorAll('.preset-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const preset = btn.dataset.preset;
       applyPresetToActiveChar(preset);
@@ -74,11 +74,11 @@ function saveProxyAndClose() {
   const url = document.getElementById('proxyUrl').value.trim();
   state.proxyUrl = url;
   localStorage.setItem('mimo_proxy_url', url);
-  // corsModal removed for neon version
+  document.getElementById('corsModal').classList.add('hidden');
 }
 
 function closeModal() {
-  // corsModal removed for neon version
+  document.getElementById('corsModal').classList.add('hidden');
 }
 
 // --- Text Segmentation ---
@@ -158,10 +158,10 @@ function renderStep2() {
     const card = document.createElement('div');
     card.className = `char-card ${char.isNarrator ? 'narrator' : ''}`;
     card.innerHTML = `
-      <div class="char-top">
+      <div class="char-header">
         <span class="char-name">
           ${char.isNarrator ? '📖' : '🎭'} ${name}
-          <span class="char-badge ${char.isNarrator ? 'nar' : 'dia'}">
+          <span class="char-badge ${char.isNarrator ? 'narrator-badge' : 'dialogue-badge'}">
             ${char.isNarrator ? '旁白' : '对话'}
           </span>
         </span>
