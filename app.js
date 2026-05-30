@@ -171,7 +171,7 @@ function renderStep2() {
       </div>
       <textarea class="char-textarea" data-speaker="${name}"
         placeholder="描述这个角色的声音特征..."
-        oninput="updateCharDesc('${name}', this.value)">${char.desc}</textarea>
+        oninput="updateCharDesc('${name}', this.value)" onfocus="lastFocusedSpeaker='${name}'">${char.desc}</textarea>
     `;
     panel.appendChild(card);
   }
@@ -181,6 +181,7 @@ function renderStep2() {
 
 function updateCharDesc(name, value) {
   if (state.characters[name]) state.characters[name].desc = value;
+  lastFocusedSpeaker = name;
 }
 
 function renderSegmentsList() {
@@ -198,25 +199,25 @@ function renderSegmentsList() {
 }
 
 // --- Presets ---
+let lastFocusedSpeaker = null;
+
 function applyPresetToActiveChar(presetKey) {
   const desc = PRESETS[presetKey];
   if (!desc) return;
-  // Apply to the last focused textarea, or first non-narrator char
-  const activeEl = document.activeElement;
-  if (activeEl && activeEl.classList.contains('char-textarea')) {
-    activeEl.value = desc;
-    const speaker = activeEl.dataset.speaker;
-    if (speaker) state.characters[speaker].desc = desc;
-  } else {
-    // Apply to first non-narrator character
-    for (const [name, char] of Object.entries(state.characters)) {
-      if (!char.isNarrator) {
-        char.desc = desc;
-        renderStep2();
-        return;
-      }
-    }
+
+  // Find the target: last focused textarea, or first character
+  let targetSpeaker = lastFocusedSpeaker;
+  if (!targetSpeaker || !state.characters[targetSpeaker]) {
+    // Fallback: first character (narrator first, then others)
+    targetSpeaker = Object.keys(state.characters)[0];
   }
+  if (!targetSpeaker) return;
+
+  state.characters[targetSpeaker].desc = desc;
+
+  // Update the textarea directly if it exists
+  const textarea = document.querySelector(`.char-textarea[data-speaker="${targetSpeaker}"]`);
+  if (textarea) textarea.value = desc;
 }
 
 // --- Clear ---
