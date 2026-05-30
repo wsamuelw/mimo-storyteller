@@ -59,39 +59,74 @@
       <div class="section-label">🎭 Characters</div>
       <div class="char-grid" id="charactersPanel"></div>
       <div class="preset-bar">
-        <button class="preset-btn active" data-preset="narrator">📖 沉稳旁白</button>
+        <button class="preset-btn active" data-preset="narrator">📖 旁白</button>
         <button class="preset-btn" data-preset="young-male">🧑 年轻男性</button>
         <button class="preset-btn" data-preset="young-female">👩 年轻女性</button>
         <button class="preset-btn" data-preset="elder-male">👴 老年男性</button>
         <button class="preset-btn" data-preset="elder-female">👵 老年女性</button>
         <button class="preset-btn" data-preset="child">🧒 童声</button>
-        <button class="preset-btn" data-preset="villain">😈 反派</button>
-        <button class="preset-btn" data-preset="hero">🦸 英雄</button>
-        <button class="preset-btn" data-preset="gentle-female">🌸 温柔女声</button>
-        <button class="preset-btn" data-preset="energetic-male">🔥 活力男声</button>
-        <button class="preset-btn" data-preset="news-anchor">📺 新闻主播</button>
-        <button class="preset-btn" data-preset="storyteller">📚 说书人</button>
-        <button class="preset-btn" data-preset="robot">🤖 机械音</button>
-        <button class="preset-btn" data-preset="sweet-girl">🍬 甜美少女</button>
-        <button class="preset-btn" data-preset="gruff-old">🪵 粗犷老者</button>
-        <button class="preset-btn" data-preset="mysterious">🌙 神秘人</button>
         <button class="preset-btn" data-preset="flirty">💋 性感女声</button>
-        <button class="preset-btn" data-preset="seductive">🖤 魅惑女声</button>
-        <button class="preset-btn" data-preset="domina">👑 女王音</button>
-        <button class="preset-btn" data-preset="tsundere">💢 傲娇女</button>
-        <button class="preset-btn" data-preset="yandere">🔪 病娇女</button>
-        <button class="preset-btn" data-preset="loli">🎀 萝莉音</button>
-        <button class="preset-btn" data-preset="onee-san">🌺 御姐音</button>
-        <button class="preset-btn" data-preset="kuudere">❄️ 冷淡女</button>
-        <button class="preset-btn" data-preset="ojou-sama">💎 大小姐</button>
-        <button class="preset-btn" data-preset="catgirl">🐱 猫娘</button>
-        <button class="preset-btn" data-preset="nurse">💉 护士</button>
-        <button class="preset-btn" data-preset="secretary">📋 女秘书</button>
-        <button class="preset-btn" data-preset="ex-girlfriend">💔 前女友</button>
-        <button class="preset-btn" data-preset="gamer-girl">🎮 电竞少女</button>
-        <button class="preset-btn" data-preset="luxury">🥂 名媛音</button>
-        <button class="preset-btn" data-preset="whisper">🤫 耳语</button>
+        <button class="preset-btn" data-preset="hero">🦸 英雄</button>
       </div>
+      <details class="preset-expand">
+        <summary class="preset-expand-trigger">更多声音 ▾</summary>
+        <div class="preset-categories">
+          <details class="preset-category" open>
+            <summary class="preset-cat-label">🌸 温柔系</summary>
+            <div class="preset-bar">
+              <button class="preset-btn" data-preset="gentle-female">温柔女声</button>
+              <button class="preset-btn" data-preset="onee-san">御姐音</button>
+              <button class="preset-btn" data-preset="nurse">护士</button>
+              <button class="preset-btn" data-preset="whisper">耳语</button>
+            </div>
+          </details>
+          <details class="preset-category" open>
+            <summary class="preset-cat-label">😈 暗黑系</summary>
+            <div class="preset-bar">
+              <button class="preset-btn" data-preset="villain">反派</button>
+              <button class="preset-btn" data-preset="yandere">病娇女</button>
+              <button class="preset-btn" data-preset="seductive">魅惑女声</button>
+              <button class="preset-btn" data-preset="domina">女王音</button>
+            </div>
+          </details>
+          <details class="preset-category" open>
+            <summary class="preset-cat-label">🎭 性格系</summary>
+            <div class="preset-bar">
+              <button class="preset-btn" data-preset="tsundere">傲娇女</button>
+              <button class="preset-btn" data-preset="kuudere">冷淡女</button>
+              <button class="preset-btn" data-preset="energetic-male">活力男声</button>
+              <button class="preset-btn" data-preset="gamer-girl">电竞少女</button>
+            </div>
+          </details>
+          <details class="preset-category" open>
+            <summary class="preset-cat-label">🎪 特色系</summary>
+            <div class="preset-bar">
+              <button class="preset-btn" data-preset="storyteller">说书人</button>
+              <button class="preset-btn" data-preset="news-anchor">新闻主播</button>
+              <button class="preset-btn" data-preset="robot">机械音</button>
+              <button class="preset-btn" data-preset="catgirl">猫娘</button>
+            </div>
+          </details>
+          <details class="preset-category" open>
+            <summary class="preset-cat-label">💎 气质系</summary>
+            <div class="preset-bar">
+              <button class="preset-btn" data-preset="ojou-sama">大小姐</button>
+              <button class="preset-btn" data-preset="luxury">名媛音</button>
+              <button class="preset-btn" data-preset="mysterious">神秘人</button>
+              <button class="preset-btn" data-preset="ex-girlfriend">前女友</button>
+            </div>
+          </details>
+          <details class="preset-category" open>
+            <summary class="preset-cat-label">👶 年龄系</summary>
+            <div class="preset-bar">
+              <button class="preset-btn" data-preset="child">童声</button>
+              <button class="preset-btn" data-preset="loli">萝莉音</button>
+              <button class="preset-btn" data-preset="sweet-girl">甜美少女</button>
+              <button class="preset-btn" data-preset="gruff-old">粗犷老者</button>
+            </div>
+          </details>
+        </div>
+      </details>
     </div>
 
     <!-- Segment Preview -->

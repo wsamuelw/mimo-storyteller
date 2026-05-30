@@ -465,3 +465,38 @@ body::before {
   .player-controls { flex-direction: column; align-items: stretch; }
   .dl-btn { margin-left: 0; }
 }
+
+/* Preset expand/collapse */
+.preset-expand { margin-top: 12px; }
+.preset-expand-trigger {
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  letter-spacing: 1px;
+  padding: 4px 0;
+  transition: color .15s;
+  list-style: none;
+}
+.preset-expand-trigger::-webkit-details-marker { display: none; }
+.preset-expand-trigger::before { content: ''; }
+.preset-expand-trigger:hover { color: var(--cyan); }
+.preset-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+.preset-category { }
+.preset-cat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px 0;
+  letter-spacing: 1px;
+  list-style: none;
+  transition: color .15s;
+}
+.preset-cat-label::-webkit-details-marker { display: none; }
+.preset-cat-label::before { content: ''; }
+.preset-cat-label:hover { color: var(--magenta); }
