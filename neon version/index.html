@@ -47,6 +47,10 @@
   <div class="text-area glass glass-glow">
     <div class="text-area-header"><h3>📝 Source Text</h3><span>auto-segment on paste</span></div>
     <textarea id="textInput" placeholder="粘贴小说或故事片段...&#10;&#10;支持「」和 "" 标记的对话，自动识别旁白与角色。"></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn-neon" onclick="segmentText()">✨ 智能分段</button>
+      <button class="btn-neon" onclick="clearAll()" style="border-color:var(--border);color:var(--text-dim);background:var(--surface)">清空</button>
+    </div>
   </div>
 
   <!-- Step 2: Characters -->
