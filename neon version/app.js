@@ -150,6 +150,7 @@ function buildCharacters() {
 function renderStep2() {
   document.getElementById('step2').classList.remove('hidden');
   document.getElementById('step3').classList.add('hidden');
+  document.getElementById('progressArea').style.display = 'none';
 
   const panel = document.getElementById('charactersPanel');
   panel.innerHTML = '';

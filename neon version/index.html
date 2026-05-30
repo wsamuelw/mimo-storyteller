@@ -46,44 +46,44 @@
   <!-- Step 1: Text Input -->
   <div class="text-area glass glass-glow">
     <div class="text-area-header"><h3>📝 Source Text</h3><span>auto-segment on paste</span></div>
-    <textarea id="textInput" placeholder="粘贴小说或故事片段...&#10;&#10;支持「」和 "" 标记的对话，自动识别旁白与角色。"></textarea>
+    <textarea id="textInput" rows="10" placeholder="粘贴小说或故事片段...&#10;&#10;支持「」和 "" 标记的对话，自动识别旁白与角色。"></textarea>
     <div style="display:flex;gap:8px;margin-top:12px">
       <button class="btn-neon" onclick="segmentText()">✨ 智能分段</button>
       <button class="btn-neon" onclick="clearAll()" style="border-color:var(--border);color:var(--text-dim);background:var(--surface)">清空</button>
     </div>
   </div>
 
-  <!-- Step 2: Characters -->
-  <div class="char-section hidden" id="step2">
-    <div class="section-label">🎭 Characters</div>
-    <div class="char-grid" id="charactersPanel"></div>
-    <div class="preset-bar">
-      <button class="preset-btn active" data-preset="narrator">📖 沉稳旁白</button>
-      <button class="preset-btn" data-preset="young-male">🧑 年轻男性</button>
-      <button class="preset-btn" data-preset="young-female">👩 年轻女性</button>
-      <button class="preset-btn" data-preset="elder-male">👴 老年男性</button>
-      <button class="preset-btn" data-preset="elder-female">👵 老年女性</button>
-      <button class="preset-btn" data-preset="child">🧒 童声</button>
-      <button class="preset-btn" data-preset="villain">😈 反派</button>
-      <button class="preset-btn" data-preset="hero">🦸 英雄</button>
+  <!-- Step 2: Characters + Segments + Generate + Progress (ALL inside step2) -->
+  <div class="hidden" id="step2">
+    <div class="char-section">
+      <div class="section-label">🎭 Characters</div>
+      <div class="char-grid" id="charactersPanel"></div>
+      <div class="preset-bar">
+        <button class="preset-btn active" data-preset="narrator">📖 沉稳旁白</button>
+        <button class="preset-btn" data-preset="young-male">🧑 年轻男性</button>
+        <button class="preset-btn" data-preset="young-female">👩 年轻女性</button>
+        <button class="preset-btn" data-preset="elder-male">👴 老年男性</button>
+        <button class="preset-btn" data-preset="elder-female">👵 老年女性</button>
+        <button class="preset-btn" data-preset="child">🧒 童声</button>
+        <button class="preset-btn" data-preset="villain">😈 反派</button>
+        <button class="preset-btn" data-preset="hero">🦸 英雄</button>
+      </div>
     </div>
-  </div>
 
-  <!-- Segment Preview -->
-  <div class="hidden" id="segmentPreview">
-    <div class="section-label">📋 Segments (<span id="segmentCount">0</span>)</div>
+    <!-- Segment Preview -->
+    <div class="section-label" style="margin-top:20px">📋 Segments (<span id="segmentCount">0</span>)</div>
     <div class="segments" id="segmentsList"></div>
-  </div>
 
-  <!-- Generate Button -->
-  <div class="gen-row hidden" id="actionRow">
-    <button class="gen-btn" onclick="generateAll()" id="generateBtn">🎵 生成全部音频</button>
-  </div>
+    <!-- Generate Button -->
+    <div class="gen-row" style="margin-top:16px">
+      <button class="gen-btn" onclick="generateAll()" id="generateBtn">🎵 生成全部音频</button>
+    </div>
 
-  <!-- Progress -->
-  <div class="hidden" id="progressArea">
-    <div class="progress-text" id="progressText">Preparing...</div>
-    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <!-- Progress -->
+    <div id="progressArea">
+      <div class="progress-text" id="progressText">Preparing...</div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
   </div>
 
   <!-- Step 3: Player -->
