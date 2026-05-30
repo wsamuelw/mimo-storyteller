@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup 3 — Neon Glass</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08081a;--surface:rgba(255,255,255,.04);--surface-hover:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.08);--border-hover:rgba(255,255,255,.15);
+  --cyan:#00e5ff;--magenta:#ff2daa;--violet:#8b5cf6;
+  --cyan-glow:rgba(0,229,255,.12);--magenta-glow:rgba(255,45,170,.12);
+  --text:#e8e8f0;--text-dim:#6a6888;
+  --radius:16px;--radius-sm:10px;
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;position:relative}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(circle at 30% 20%,rgba(139,92,246,.08) 0%,transparent 50%),
+             radial-gradient(circle at 70% 80%,rgba(0,229,255,.06) 0%,transparent 50%),
+             radial-gradient(circle at 50% 50%,rgba(255,45,170,.04) 0%,transparent 60%);
+  pointer-events:none;z-index:0;animation:bgShift 20s ease-in-out infinite alternate}
+@keyframes bgShift{0%{transform:translate(0,0) rotate(0deg)}100%{transform:translate(-5%,3%) rotate(3deg)}}
+.app{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:32px 20px 80px}
+
+/* Header */
+.header{text-align:center;margin-bottom:40px;position:relative}
+.header h1{font-size:36px;font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--magenta));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1px}
+.header p{color:var(--text-dim);font-size:14px;margin-top:6px;font-weight:300}
+
+/* Glass cards */
+.glass{background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s,box-shadow .2s}
+.glass:hover{border-color:var(--border-hover)}
+.glass-glow{box-shadow:0 0 40px rgba(139,92,246,.05)}
+
+/* Config */
+.config-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.config-bar .glass{flex:1;min-width:200px;padding:14px 16px}
+.config-bar label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}
+.config-bar input,.config-bar select{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:border-color .2s}
+.config-bar input:focus,.config-bar select:focus{border-color:var(--cyan)}
+.config-bar select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+
+/* Text input */
+.text-area{margin-bottom:20px}
+.text-area textarea{width:100%;min-height:160px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--radius);padding:20px;color:var(--text);font-family:'Noto Sans SC',sans-serif;font-size:14px;line-height:2;resize:none;outline:none;transition:border-color .2s}
+.text-area textarea:focus{border-color:var(--cyan)}
+.text-area textarea::placeholder{color:var(--text-dim)}
+.text-area-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.text-area-header h3{font-size:13px;font-weight:600}
+.text-area-header span{font-size:11px;color:var(--text-dim)}
+
+/* Characters */
+.char-section{margin-bottom:20px}
+.section-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+.char-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.char-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;transition:all .2s}
+.char-card:hover{border-color:var(--border-hover);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.char-card.narrator{border-color:rgba(0,229,255,.2);background:linear-gradient(135deg,rgba(0,229,255,.03),rgba(139,92,246,.03))}
+.char-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.char-name{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.char-badge{font-size:8px;padding:3px 8px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;font-weight:600}
+.char-badge.nar{background:var(--cyan-glow);color:var(--cyan)}
+.char-badge.dia{background:var(--magenta-glow);color:var(--magenta)}
+.char-textarea{width:100%;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:inherit;font-size:12px;resize:vertical;min-height:48px;outline:none;transition:border-color .2s}
+.char-textarea:focus{border-color:var(--cyan)}
+
+/* Presets */
+.preset-bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.preset-pill{padding:6px 14px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--text-dim);font-family:inherit;font-size:11px;cursor:pointer;transition:all .2s;font-weight:500}
+.preset-pill:hover{border-color:var(--magenta);color:var(--magenta);background:var(--magenta-glow)}
+.preset-pill.active{background:linear-gradient(135deg,rgba(0,229,255,.15),rgba(139,92,246,.15));border-color:var(--cyan);color:var(--cyan)}
+
+/* Generate button */
+.gen-row{margin-bottom:24px}
+.gen-btn{width:100%;padding:16px;border:none;border-radius:var(--radius);font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;position:relative;overflow:hidden;color:white;background:linear-gradient(135deg,var(--cyan),var(--violet),var(--magenta));background-size:200% 200%;animation:gradShift 3s ease infinite;transition:transform .15s,box-shadow .15s}
+.gen-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,229,255,.25),0 4px 16px rgba(139,92,246,.2)}
+.gen-btn:active{transform:translateY(0)}
+@keyframes gradShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.gen-btn::after{content:'';position:inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transform:translateX(-100%);transition:transform .6s}
+.gen-btn:hover::after{transform:translateX(100%)}
+
+/* Player */
+.player-section{margin-top:4px}
+.player-controls{display:flex;gap:8px;margin-bottom:16px;align-items:center}
+.transport{display:flex;gap:4px}
+.transport button{width:38px;height:38px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:15px;cursor:pointer;display:grid;place-items:center;transition:all .15s;backdrop-filter:blur(10px)}
+.transport button:hover{border-color:var(--cyan);color:var(--cyan)}
+.transport button.active{background:linear-gradient(135deg,rgba(0,229,255,.2),rgba(139,92,246,.2));border-color:var(--cyan);color:var(--cyan)}
+.dl-btn{margin-left:auto;padding:8px 18px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:inherit;font-size:11px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:all .15s;backdrop-filter:blur(10px)}
+.dl-btn:hover{border-color:var(--magenta);color:var(--magenta);background:var(--magenta-glow)}
+.segments{display:flex;flex-direction:column;gap:6px}
+.seg{display:grid;grid-template-columns:36px 70px 1fr 36px;align-items:center;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);transition:all .15s;backdrop-filter:blur(10px)}
+.seg:hover{border-color:var(--border-hover);background:var(--surface-hover)}
+.seg.playing{border-color:rgba(0,229,255,.3);background:linear-gradient(135deg,rgba(0,229,255,.05),rgba(139,92,246,.03));box-shadow:0 0 20px rgba(0,229,255,.05)}
+.seg-idx{font-size:11px;color:var(--text-dim);font-weight:600}
+.seg-type{font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:20px;font-weight:600;display:inline-block;width:fit-content}
+.seg-type.nar{background:var(--cyan-glow);color:var(--cyan)}
+.seg-type.dia{background:var(--magenta-glow);color:var(--magenta)}
+.seg-text{font-size:12px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px}
+.seg-dl{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;transition:color .15s}
+.seg-dl:hover{color:var(--cyan)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+@media(max-width:640px){
+  .config-bar{flex-direction:column}
+  .char-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <h1>🎙️ 有声书片段生成器</h1>
+    <p>MiMo-V2.5-TTS · Voice Design</p>
+  </header>
+
+  <div class="config-bar">
+    <div class="glass"><label>API Key</label><input type="password" placeholder="tp-xxxxxxxxxx"></div>
+    <div class="glass"><label>Endpoint</label><select><option>Standard</option><option>Token Plan CN</option><option selected>Token Plan SGP</option></select></div>
+    <div class="glass"><label>Proxy (CORS)</label><input type="url" placeholder="https://worker.dev"></div>
+  </div>
+
+  <div class="text-area glass glass-glow">
+    <div class="text-area-header"><h3>📝 Source Text</h3><span>auto-segment on paste</span></div>
+    <textarea placeholder="粘贴小说或故事片段...&#10;&#10;支持「」和 "" 标记的对话，自动识别旁白与角色。"></textarea>
+  </div>
+
+  <div class="char-section">
+    <div class="section-label">🎭 Characters</div>
+    <div class="char-grid">
+      <div class="char-card narrator">
+        <div class="char-top"><span class="char-name">📖 旁白</span><span class="char-badge nar">NARRATOR</span></div>
+        <textarea class="char-textarea">一个沉稳温和的中年男性声音，语速适中，吐字清晰，像深夜电台主播。</textarea>
+      </div>
+      <div class="char-card">
+        <div class="char-top"><span class="char-name">🎭 老张</span><span class="char-badge dia">DIALOGUE</span></div>
+        <textarea class="char-textarea" placeholder="描述声音特征..."></textarea>
+      </div>
+      <div class="char-card">
+        <div class="char-top"><span class="char-name">🎭 小李</span><span class="char-badge dia">DIALOGUE</span></div>
+        <textarea class="char-textarea" placeholder="描述声音特征..."></textarea>
+      </div>
+    </div>
+    <div class="preset-bar">
+      <button class="preset-pill active">📖 沉稳旁白</button>
+      <button class="preset-pill">🧑 年轻男性</button>
+      <button class="preset-pill">👩 年轻女性</button>
+      <button class="preset-pill">👴 老年男性</button>
+      <button class="preset-pill">👵 老年女性</button>
+      <button class="preset-pill">🧒 童声</button>
+      <button class="preset-pill">😈 反派</button>
+      <button class="preset-pill">🦸 英雄</button>
+    </div>
+  </div>
+
+  <div class="gen-row"><button class="gen-btn">🎵 生成全部音频</button></div>
+
+  <div class="player-section">
+    <div class="section-label">🎧 Playback</div>
+    <div class="glass glass-glow" style="padding:16px">
+      <div class="player-controls">
+        <div class="transport">
+          <button class="active">▶</button><button>⏸</button><button>⏹</button>
+        </div>
+        <button class="dl-btn">💾 下载全部</button>
+      </div>
+      <div class="segments">
+        <div class="seg playing"><span class="seg-idx">#1</span><span class="seg-type nar">旁白</span><span class="seg-text">老张推开吱呀作响的木门，看见小李正坐在窗边发呆。</span><button class="seg-dl">💾</button></div>
+        <div class="seg"><span class="seg-idx">#2</span><span class="seg-type dia">老张</span><span class="seg-text">「你怎么来了？」</span><button class="seg-dl">💾</button></div>
+        <div class="seg"><span class="seg-idx">#3</span><span class="seg-type dia">小李</span><span class="seg-text">小李抬起头，眼里带着几分惊讶。</span><button class="seg-dl">💾</button></div>
+        <div class="seg"><span class="seg-idx">#4</span><span class="seg-type nar">旁白</span><span class="seg-text">老张把手中的信封递过去：「你的信，从南方寄来的。」</span><button class="seg-dl">💾</button></div>
+        <div class="seg"><span class="seg-idx">#5</span><span class="seg-type dia">小李</span><span class="seg-text">小李接过信封，手指微微发抖。「是……她的信？」</span><button class="seg-dl">💾</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>document.querySelectorAll('.preset-pill').forEach(c=>{c.addEventListener('click',()=>{document.querySelectorAll('.preset-pill').forEach(x=>x.classList.remove('active'));c.classList.add('active')})})</script>
+</body>
+</html>
