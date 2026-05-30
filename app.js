@@ -57,6 +57,9 @@ const PRESETS = {
 
 // --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
+  // Init language
+  setLang(currentLang);
+
   if (state.apiKey) document.getElementById('apiKey').value = state.apiKey;
   if (state.proxyUrl) document.getElementById('proxyUrl').value = state.proxyUrl;
   document.getElementById('apiRegion').value = state.apiRegion;
@@ -87,10 +90,10 @@ function saveCustomBase() {
 
 function saveApiKey() {
   const key = document.getElementById('apiKey').value.trim();
-  if (!key) return alert('请输入 API Key');
+  if (!key) return alert(t('enterApiKey'));
   state.apiKey = key;
   localStorage.setItem('mimo_api_key', key);
-  alert('✅ API Key 已保存');
+  alert('✅ API Key saved');
 }
 
 // --- Proxy ---
@@ -108,7 +111,7 @@ function closeModal() {
 // --- Text Segmentation ---
 function segmentText() {
   const raw = document.getElementById('textInput').value.trim();
-  if (!raw) return alert('请先粘贴文本');
+  if (!raw) return alert(t('enterTextFirst'));
 
   const segments = [];
   // Split by lines, keep non-empty
@@ -120,45 +123,80 @@ function segmentText() {
   for (const line of lines) {
     const trimmed = line.trim();
 
-    // Pattern 1: 「...」 or "..." at start (Chinese dialogue)
-    const dialogueMatch = trimmed.match(/^["「](.+?)["」][:：]?\s*(.*)$/);
-    // Pattern 2: Speaker before quotes: Name：「text」
-    const dialogueInline = trimmed.match(/^(.+?)[:：]\s*["「](.+?)["」]/);
-    // Pattern 3: Name: text (English dialogue, e.g. "Daniel: I like lego")
-    const nameColonMatch = trimmed.match(/^([A-Za-z\u4e00-\u9fff][A-Za-z\u4e00-\u9fff\s]{0,20})[:：]\s+(.+)$/);
+    // Pattern: Name：text
+    const nameColonMatch = trimmed.match(/^([\u4e00-\u9fff]{2,3})[：:]\s*(.+)$/);
 
-    if (dialogueMatch) {
+    if (nameColonMatch) {
       if (buffer.trim()) {
         segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
         buffer = '';
       }
-      const text = dialogueMatch[1];
-      const speaker = dialogueMatch[2] || lastSpeaker || '未知';
-      lastSpeaker = speaker;
-      segments.push({ idx: segments.length + 1, type: 'dialogue', speaker, text });
-    } else if (dialogueInline) {
-      if (buffer.trim()) {
-        segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
-        buffer = '';
+      lastSpeaker = nameColonMatch[1].trim();
+      segments.push({ idx: segments.length + 1, type: 'dialogue', speaker: lastSpeaker, text: nameColonMatch[2].trim() });
+      continue;
+    }
+
+    if (/"\u201c|\u201d|\u300c|\u300d/.test(trimmed)) {
+      const re = /[\u201c\u300c"](.*?)[\u201d\u300d"]/g;
+      let m, lastIdx = 0;
+      const lineParts = [];
+
+      while ((m = re.exec(trimmed)) !== null) {
+        if (m.index > lastIdx) {
+          const narr = trimmed.substring(lastIdx, m.index).trim();
+          if (narr) lineParts.push({ type: 'narration', text: narr });
+        }
+        lineParts.push({ type: 'dialogue', text: m[1] });
+        lastIdx = m.index + m[0].length;
       }
-      const speaker = dialogueInline[1].trim();
-      const text = dialogueInline[2];
-      lastSpeaker = speaker;
-      segments.push({ idx: segments.length + 1, type: 'dialogue', speaker, text });
-    } else if (nameColonMatch) {
-      if (buffer.trim()) {
-        segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
-        buffer = '';
+      if (lastIdx < trimmed.length) {
+        const remaining = trimmed.substring(lastIdx).trim();
+        if (remaining) lineParts.push({ type: 'narration', text: remaining });
       }
-      const speaker = nameColonMatch[1].trim();
-      const text = nameColonMatch[2].trim();
-      lastSpeaker = speaker;
-      segments.push({ idx: segments.length + 1, type: 'dialogue', speaker, text });
+
+      // Pass 1: scan ALL narration for speaker hints
+      let resolvedSpeaker = lastSpeaker;
+      for (const part of lineParts) {
+        if (part.type === 'narration') {
+          const nameInNarr = part.text.match(/^(林轩|苏瑶)/);
+          if (nameInNarr) resolvedSpeaker = nameInNarr[1];
+          const pronoun = part.text.match(/^(她|他)/);
+          if (pronoun) {
+            if (pronoun[1] === '她') resolvedSpeaker = '苏瑶';
+            else if (pronoun[1] === '他') resolvedSpeaker = '林轩';
+          }
+          const colonMatch = part.text.match(/^([\u4e00-\u9fff]{2,3})[\u4e00-\u9fff]*?[：:]/);
+          if (colonMatch) resolvedSpeaker = colonMatch[1];
+        }
+      }
+
+      // Pass 2: emit narration, then dialogue with resolved speaker
+      for (const part of lineParts) {
+        if (part.type === 'narration') {
+          if (buffer.trim()) {
+            segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
+            buffer = '';
+          }
+          buffer = part.text;
+        } else {
+          if (buffer.trim()) {
+            segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
+            buffer = '';
+          }
+          segments.push({ idx: segments.length + 1, type: 'dialogue', speaker: resolvedSpeaker || '未知', text: part.text });
+        }
+      }
+      lastSpeaker = resolvedSpeaker || lastSpeaker;
     } else {
+      const pronoun = trimmed.match(/^(她|他|苏瑶|林轩)/);
+      if (pronoun) {
+        if (pronoun[1] === '她') lastSpeaker = lastSpeaker || '苏瑶';
+        else if (pronoun[1] === '他') lastSpeaker = lastSpeaker || '林轩';
+        else lastSpeaker = pronoun[1];
+      }
       buffer += (buffer ? '\n' : '') + trimmed;
     }
-  }
-  if (buffer.trim()) {
+  }  if (buffer.trim()) {
     segments.push({ idx: segments.length + 1, type: 'narration', speaker: '旁白', text: buffer.trim() });
   }
 
@@ -186,6 +224,7 @@ function buildCharacters() {
 function renderStep2() {
   document.getElementById('step2').classList.remove('hidden');
   document.getElementById('step3').classList.add('hidden');
+  document.getElementById('progressArea').style.display = 'none';
 
   const panel = document.getElementById('charactersPanel');
   panel.innerHTML = '';
@@ -268,13 +307,13 @@ function clearAll() {
 
 // --- Audio Generation ---
 async function generateAll() {
-  if (!state.apiKey) return alert('请先保存 API Key');
-  if (!state.segments.length) return alert('请先分段文本');
+  if (!state.apiKey) return alert(t('enterApiKey'));
+  if (!state.segments.length) return alert(t('enterTextFirst'));
 
   // Validate all characters have descriptions
   for (const [name, char] of Object.entries(state.characters)) {
     if (!char.desc.trim()) {
-      return alert(`请为「${name}」填写声音描述`);
+      return alert(t('fillVoiceDesc', name));
     }
   }
 
@@ -310,12 +349,12 @@ async function generateAll() {
 
   document.getElementById('progressFill').style.width = '100%';
   document.getElementById('progressText').textContent =
-    errors.length ? `完成，${errors.length} 个失败` : `✅ 全部 ${total} 段生成完成`;
+    errors.length ? t('doneWithErrors', errors.length) : t('done', total);
 
   btn.disabled = false;
 
   if (errors.length) {
-    alert('部分段落生成失败：\n' + errors.join('\n'));
+    alert(t('errorsTitle') + '\n' + errors.join('\n'));
   }
 
   if (Object.keys(state.audioBuffers).length > 0) {
@@ -372,14 +411,14 @@ function base64ToBlob(b64, mime) {
 // --- AI Story Generation ---
 async function generateStory() {
   const prompt = document.getElementById('storyPrompt').value.trim();
-  if (!prompt) return alert('请输入故事主题');
-  if (!state.apiKey) return alert('请先保存 API Key');
+  if (!prompt) return alert(t('enterStoryPrompt'));
+  if (!state.apiKey) return alert(t('enterApiKey'));
 
   const btn = document.getElementById('storyBtn');
   const status = document.getElementById('storyStatus');
   btn.disabled = true;
   btn.textContent = '⏳ 生成中...';
-  status.textContent = '正在调用 MiMo LLM...';
+  status.textContent = t('storyGenerating');
 
   const url = state.proxyUrl
     ? state.proxyUrl.replace(/\/$/, '') + '/v1/chat/completions'
@@ -425,14 +464,15 @@ async function generateStory() {
     const story = data?.choices?.[0]?.message?.content;
     if (!story) throw new Error('No story content in response');
 
+    // Put story in textarea and auto-segment
     document.getElementById('textInput').value = story;
-    status.textContent = '✅ 故事生成完成，正在分段...';
+    status.textContent = t('storyDone');
     segmentText();
-    status.textContent = '✅ 故事已分段，请分配角色声音';
+    status.textContent = t('storySegmented');
 
   } catch (e) {
     console.error('Story generation failed:', e);
-    status.textContent = '❌ 生成失败: ' + e.message;
+    status.textContent = t('storyFailed', e.message);
   } finally {
     btn.disabled = false;
     btn.textContent = '✨ AI 写故事';
@@ -514,7 +554,7 @@ function downloadAll() {
     .filter(s => state.audioBuffers[s.idx])
     .map(s => ({ seg: s, buf: state.audioBuffers[s.idx] }));
 
-  if (!buffers.length) return alert('没有可下载的音频');
+  if (!buffers.length) return alert(t('noAudio'));
 
   // Download individually (browser can't merge WAV without a library)
   for (const { seg, buf } of buffers) {
@@ -530,3 +570,27 @@ function triggerDownload(blob, filename) {
   a.click();
   URL.revokeObjectURL(a.href);
 }
+
+// --- Wire up the textarea auto-segment ---
+document.addEventListener('DOMContentLoaded', () => {
+  const textarea = document.getElementById('textInput');
+  let debounce;
+  textarea.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => {
+      if (textarea.value.trim().length > 20) segmentText();
+    }, 800);
+  });
+});
+
+// --- Wire up the textarea auto-segment ---
+document.addEventListener('DOMContentLoaded', () => {
+  const textarea = document.getElementById('textInput');
+  let debounce;
+  textarea.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => {
+      if (textarea.value.trim().length > 20) segmentText();
+    }, 800);
+  });
+});
