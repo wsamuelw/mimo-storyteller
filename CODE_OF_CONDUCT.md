@@ -21,9 +21,20 @@ Examples of unacceptable behavior:
 - Publishing others' private information without explicit permission
 - Other conduct which could reasonably be considered inappropriate
 
+## Scope
+
+This Code of Conduct applies within all project spaces (GitHub issues, pull requests, discussions) and also applies when an individual is representing the project in public spaces.
+
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project maintainer. All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported via [GitHub's private vulnerability reporting](https://github.com/wsamuelw/mimo-storyteller/security/advisories/new). All complaints will be reviewed and investigated promptly and fairly.
+
+### Enforcement Guidelines
+
+1. **Correction** — A private warning from the maintainer.
+2. **Warning** — A formal warning with consequences for continued behavior.
+3. **Temporary Ban** — Temporary removal from the project.
+4. **Permanent Ban** — Permanent removal from the project.
 
 ## Attribution
 

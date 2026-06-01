@@ -33,6 +33,7 @@ If applicable, add screenshots to help explain the problem.
 - **Browser:** [e.g. Chrome 120, Safari 17, Firefox 121]
 - **OS:** [e.g. macOS 14, Windows 11, iOS 17]
 - **Device:** [e.g. Desktop, iPhone 15, iPad]
+- **App version / commit:** [e.g. latest main, or commit hash]
 
 ## Additional Context
 
