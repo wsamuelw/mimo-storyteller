@@ -5,7 +5,7 @@
 
 [English](README.md) | [简体中文](README-zh-CN.md) | **繁體中文**
 
-貼個故事落去，分配唔同角色嘅聲音，聽 AI 旁白，支援卡拉 OK 逐字高亮。用 MiMo-V2.5-TTS API 打造 — 唔需要後端，唔需要 build。
+MiMo-V2.5 TTS 限時免費——所以我做咗一個多角色故事講述器。生成故事，自動分配角色聲音，文字實時高亮顯示。唔需要後端，零成本。
 
 ![MiMo Storyteller Demo](images/mimo-storyteller-demo.png)
 

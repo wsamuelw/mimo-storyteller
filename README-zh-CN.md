@@ -5,7 +5,7 @@
 
 [English](README.md) | **简体中文** | [繁體中文](README-zh-TW.md)
 
-粘贴故事文本，分配角色声音，聆听 AI 朗读，支持卡拉 OK 逐字高亮。基于 MiMo-V2.5-TTS API 构建——无需后端，无需构建。
+MiMo-V2.5 TTS 限时免费——所以我做了一个多角色故事讲述器。生成故事，自动分配角色声音，文字实时高亮显示。无需后端，零成本。
 
 ![MiMo Storyteller Demo](images/mimo-storyteller-demo.png)
 

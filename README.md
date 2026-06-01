@@ -5,7 +5,7 @@
 
 **English** | [简体中文](README-zh-CN.md) | [繁體中文](README-zh-TW.md)
 
-Paste a story, assign voices, listen to AI narration with karaoke highlighting. Built with MiMo-V2.5-TTS API — zero backend, zero build step.
+MiMo-V2.5 TTS is free for a limited time — so I built a multi-character storyteller. Generate a story, voices are auto-assigned, and text highlights as it plays. Zero backend, zero cost.
 
 ![MiMo Storyteller Demo](images/mimo-storyteller-demo.png)
 
