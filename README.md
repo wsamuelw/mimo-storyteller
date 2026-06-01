@@ -2,7 +2,9 @@
 
 Paste a story, assign voices, listen to AI narration. Built with MiMo-V2.5-TTS API, hosted entirely on GitHub Pages — zero backend required.
 
-**Live Demo:** [Your GitHub Pages URL here]
+**Live Demo:** https://wsamuelw.github.io/mimo-storyteller/
+
+**Repository:** https://github.com/wsamuelw/mimo-storyteller
 
 ---
 
