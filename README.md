@@ -3,11 +3,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-cyan.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-magenta.svg)](https://wsamuelw.github.io/mimo-storyteller/)
 
+**English** | [简体中文](README-zh-CN.md) | [繁體中文](README-zh-TW.md)
+
 Paste a story, assign voices, listen to AI narration with karaoke highlighting. Built with MiMo-V2.5-TTS API — zero backend, zero build step.
 
 ![MiMo Storyteller Demo](images/mimo-storyteller-demo.png)
-
-**English** | [简体中文](README-zh-CN.md) | [繁體中文](README-zh-TW.md)
 
 ### Get Free API Credits
 
