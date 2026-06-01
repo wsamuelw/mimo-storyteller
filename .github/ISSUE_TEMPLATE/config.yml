@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions
+    url: https://github.com/wsamuelw/mimo-storyteller/discussions
+    about: Ask questions and share ideas in Discussions
