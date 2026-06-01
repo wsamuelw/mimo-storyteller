@@ -7,6 +7,12 @@ Paste a story, assign voices, listen to AI narration with karaoke highlighting. 
 
 **English** | [简体中文](README-zh-CN.md) | [繁體中文](README-zh-TW.md)
 
+### Get Free API Credits
+
+Use invite code **26GJEL** when signing up at [platform.xiaomimimo.com](https://platform.xiaomimimo.com) to get $2 in free API credits.
+
+![MiMo Invite](images/mimo-invite.png)
+
 ---
 
 ## Quick Start
