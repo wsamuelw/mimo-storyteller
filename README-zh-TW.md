@@ -3,9 +3,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-cyan.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-magenta.svg)](https://wsamuelw.github.io/mimo-storyteller/)
 
+[English](README.md) | [简体中文](README-zh-CN.md) | **繁體中文**
+
 貼個故事落去，分配唔同角色嘅聲音，聽 AI 旁白，支援卡拉 OK 逐字高亮。用 MiMo-V2.5-TTS API 打造 — 唔需要後端，唔需要 build。
 
-[English](README.md) | [简体中文](README-zh-CN.md) | **繁體中文**
+![MiMo Storyteller Demo](images/mimo-storyteller-demo.png)
+
+### 免費攞 API 額度
+
+喺 [platform.xiaomimimo.com](https://platform.xiaomimimo.com) 註冊嗰陣用邀請碼 **26GJEL**，就可以攞到 $2 免費 API 額度。
+
+![MiMo Invite](images/mimo-invite.png)
 
 ---
 
