@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MiMo TTS API Benchmark</title>
+<style>
+  body { font-family: monospace; background: #1a1a2e; color: #e0e0e0; padding: 20px; max-width: 900px; margin: 0 auto; }
+  h1 { color: #00d4ff; }
+  .section { margin: 20px 0; padding: 15px; background: #16213e; border-radius: 8px; border-left: 3px solid #00d4ff; }
+  .result { margin: 5px 0; padding: 5px 8px; background: #0f3460; border-radius: 4px; font-size: 13px; }
+  .result.error { border-left: 3px solid #ff4444; }
+  .result.success { border-left: 3px solid #00ff88; }
+  .summary { margin-top: 10px; padding: 10px; background: #1a1a40; border-radius: 4px; }
+  .summary .best { color: #00ff88; font-weight: bold; }
+  .summary .worst { color: #ff6b6b; }
+  button { background: #00d4ff; color: #000; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-family: monospace; font-size: 14px; margin: 5px; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .progress { color: #888; font-size: 12px; margin: 10px 0; }
+  label { display: inline-block; margin: 5px 10px 5px 0; }
+  input[type="text"] { background: #0f3460; color: #e0e0e0; border: 1px solid #333; padding: 8px; border-radius: 4px; width: 300px; font-family: monospace; }
+</style>
+</head>
+<body>
+<h1>MiMo TTS API Benchmark</h1>
+<p>Tests regions, formats, models, and payload structures. Runs from browser (uses sessionStorage key).</p>
+
+<div>
+  <label>API Key: <input type="text" id="apiKey" placeholder="or use session key from main app"></label>
+</div>
+<div>
+  <label>Test text: <input type="text" id="testText" value="你好世界" style="width:200px"></label>
+</div>
+
+<button id="runBtn" onclick="runBenchmark()">Run All Tests</button>
+<button id="runRegionBtn" onclick="runRegionOnly()">Regions Only (9 calls)</button>
+
+<div class="progress" id="progress"></div>
+<div id="results"></div>
+
+<script>
+const ENDPOINTS = {
+  standard: 'https://api.xiaomimimo.com/v1/chat/completions',
+  cn: 'https://token-plan-cn.xiaomimimo.com/v1/chat/completions',
+  sgp: 'https://token-plan-sgp.xiaomimimo.com/v1/chat/completions',
+};
+const VOICE_DESC = '一个沉稳温和的中年男性声音，语速适中，吐字清晰。';
+
+function getKey() {
+  return document.getElementById('apiKey').value.trim() || sessionStorage.getItem('mimo_api_key') || '';
+}
+
+function log(sectionId, text, cls = '') {
+  const el = document.getElementById(sectionId);
+  const div = document.createElement('div');
+  div.className = 'result ' + cls;
+  div.textContent = text;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function setProgress(text) {
+  document.getElementById('progress').textContent = text;
+}
+
+async function callAPI(url, payload) {
+  const key = getKey();
+  const start = performance.now();
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key,
+        'api-key': key,
+      },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(60000),
+    });
+    const elapsed = Math.round(performance.now() - start);
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => '');
+      return { elapsed, error: 'HTTP ' + resp.status + ': ' + body.substring(0, 100) };
+    }
+    const data = await resp.json();
+    const audioData = data?.choices?.[0]?.message?.audio?.data;
+    const audioKB = audioData ? Math.round(atob(audioData).length / 1024) : 0;
+    return { elapsed, audioKB };
+  } catch (e) {
+    return { elapsed: Math.round(performance.now() - start), error: e.message };
+  }
+}
+
+function makeSection(title) {
+  const id = 'sec-' + Math.random().toString(36).substr(2, 8);
+  const div = document.createElement('div');
+  div.className = 'section';
+  div.innerHTML = '<h3>' + title + '</h3><div id="' + id + '"></div>';
+  document.getElementById('results').appendChild(div);
+  return id;
+}
+
+function showSummary(sectionId, results) {
+  const valid = results.filter(r => !r.error);
+  if (!valid.length) { log(sectionId, 'All failed', 'error'); return; }
+  const avg = Math.round(valid.reduce((s, r) => s + r.elapsed, 0) / valid.length);
+  const min = Math.min(...valid.map(r => r.elapsed));
+  const max = Math.max(...valid.map(r => r.elapsed));
+  log(sectionId, 'Summary: avg=' + avg + 'ms  min=' + min + 'ms  max=' + max + 'ms  (' + valid.length + ' runs)', 'success');
+}
+
+async function runRegionOnly() {
+  if (!getKey()) return alert('Enter API key or open main MiMo app first');
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('runBtn').disabled = true;
+  document.getElementById('runRegionBtn').disabled = true;
+
+  const testText = document.getElementById('testText').value.trim() || '你好世界';
+
+  const secId = makeSection('Region Latency (3 runs each)');
+  const allResults = {};
+
+  for (const [region, url] of Object.entries(ENDPOINTS)) {
+    allResults[region] = [];
+    for (let run = 1; run <= 3; run++) {
+      setProgress('Testing ' + region + ' run ' + run + '/3 ...');
+      const payload = {
+        model: 'mimo-v2.5-tts-voicedesign',
+        messages: [
+          { role: 'user', content: VOICE_DESC },
+          { role: 'assistant', content: testText },
+        ],
+        audio: { format: 'wav' },
+      };
+      const r = await callAPI(url, payload);
+      allResults[region].push(r);
+      const cls = r.error ? 'error' : 'success';
+      log(secId, region + ' run' + run + ': ' + r.elapsed + 'ms' + (r.audioKB ? ' (' + r.audioKB + 'KB)' : '') + (r.error ? ' ERROR: ' + r.error : ''), cls);
+    }
+    showSummary(secId, allResults[region]);
+  }
+
+  // Overall comparison
+  log(secId, '');
+  log(secId, '--- REGION COMPARISON ---');
+  for (const [region, runs] of Object.entries(allResults)) {
+    const valid = runs.filter(r => !r.error);
+    if (valid.length) {
+      const avg = Math.round(valid.reduce((s, r) => s + r.elapsed, 0) / valid.length);
+      const min = Math.min(...valid.map(r => r.elapsed));
+      log(secId, region + ': avg=' + avg + 'ms  min=' + min + 'ms');
+    } else {
+      log(secId, region + ': FAILED', 'error');
+    }
+  }
+
+  setProgress('Done');
+  document.getElementById('runBtn').disabled = false;
+  document.getElementById('runRegionBtn').disabled = false;
+}
+
+async function runBenchmark() {
+  if (!getKey()) return alert('Enter API key or open main MiMo app first');
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('runBtn').disabled = true;
+  document.getElementById('runRegionBtn').disabled = true;
+
+  const testText = document.getElementById('testText').value.trim() || '你好世界';
+  let total = 0;
+
+  // --- Test 1: Region latency ---
+  const sec1 = makeSection('1. Region Latency (3 runs each)');
+  const regionResults = {};
+  for (const [region, url] of Object.entries(ENDPOINTS)) {
+    regionResults[region] = [];
+    for (let run = 1; run <= 3; run++) {
+      total++;
+      setProgress('Test ' + total + ': ' + region + ' run ' + run);
+      const payload = {
+        model: 'mimo-v2.5-tts-voicedesign',
+        messages: [{ role: 'user', content: VOICE_DESC }, { role: 'assistant', content: testText }],
+        audio: { format: 'wav' },
+      };
+      const r = await callAPI(url, payload);
+      regionResults[region].push(r);
+      log(sec1, region + ' run' + run + ': ' + r.elapsed + 'ms' + (r.audioKB ? ' (' + r.audioKB + 'KB)' : '') + (r.error ? ' ERR: ' + r.error : ''), r.error ? 'error' : 'success');
+    }
+    showSummary(sec1, regionResults[region]);
+  }
+
+  // --- Test 2: Audio format ---
+  const sec2 = makeSection('2. Audio Format (wav vs mp3)');
+  const formatResults = { wav: [], mp3: [] };
+  for (const format of ['wav', 'mp3']) {
+    for (let run = 1; run <= 2; run++) {
+      total++;
+      setProgress('Test ' + total + ': format ' + format + ' run ' + run);
+      const payload = {
+        model: 'mimo-v2.5-tts-voicedesign',
+        messages: [{ role: 'user', content: VOICE_DESC }, { role: 'assistant', content: testText }],
+        audio: { format },
+      };
+      const r = await callAPI(ENDPOINTS.sgp, payload);
+      formatResults[format].push(r);
+      log(sec2, format + ' run' + run + ': ' + r.elapsed + 'ms' + (r.audioKB ? ' (' + r.audioKB + 'KB)' : '') + (r.error ? ' ERR: ' + r.error : ''), r.error ? 'error' : 'success');
+    }
+  }
+  for (const [fmt, runs] of Object.entries(formatResults)) {
+    const valid = runs.filter(r => !r.error);
+    if (valid.length) {
+      const avg = Math.round(valid.reduce((s, r) => s + r.elapsed, 0) / valid.length);
+      const avgKB = Math.round(valid.reduce((s, r) => s + (r.audioKB || 0), 0) / valid.length);
+      log(sec2, fmt + ': avg=' + avg + 'ms  avgSize=' + avgKB + 'KB', 'success');
+    }
+  }
+
+  // --- Test 3: Model variants ---
+  const sec3 = makeSection('3. Model Variants');
+  const models = ['mimo-v2.5-tts-voicedesign', 'mimo-v2.5-tts-voiceclone', 'mimo-v2.5-tts'];
+  for (const model of models) {
+    total++;
+    setProgress('Test ' + total + ': model ' + model);
+    const payload = {
+      model,
+      messages: [{ role: 'user', content: VOICE_DESC }, { role: 'assistant', content: testText }],
+      audio: { format: 'wav', ...(model === 'mimo-v2.5-tts' ? { voice: 'mimo_default' } : {}) },
+    };
+    const r = await callAPI(ENDPOINTS.sgp, payload);
+    log(sec3, model + ': ' + r.elapsed + 'ms' + (r.audioKB ? ' (' + r.audioKB + 'KB)' : '') + (r.error ? ' ERR: ' + r.error : ''), r.error ? 'error' : 'success');
+  }
+
+  // --- Test 4: Payload variations ---
+  const sec4 = makeSection('4. Payload Variations');
+
+  // 4a: system role for voice desc
+  total++;
+  setProgress('Test ' + total + ': system-role voice');
+  {
+    const r = await callAPI(ENDPOINTS.sgp, {
+      model: 'mimo-v2.5-tts-voicedesign',
+      messages: [{ role: 'system', content: VOICE_DESC }, { role: 'user', content: testText }],
+      audio: { format: 'wav' },
+    });
+    log(sec4, 'system-role voice: ' + r.elapsed + 'ms' + (r.audioKB ? ' (' + r.audioKB + 'KB)' : '') + (r.error ? ' ERR: ' + r.error : ''), r.error ? 'error' : 'success');
+  }
+
+  // 4b: shorter voice description
+  total++;
+  setProgress('Test ' + total + ': short voice desc');
+  {
+    const r = await callAPI(ENDPOINTS.sgp, {
+      model: 'mimo-v2.5-tts-voicedesign',
+      messages: [{ role: 'user', content: '中年男性' }, { role: 'assistant', content: testText }],
+      audio: { format: 'wav' },
+    });
+    log(sec4, 'short voice desc: ' + r.elapsed + 'ms' + (r.audioKB ? ' (' + r.audioKB + 'KB)' : '') + (r.error ? ' ERR: ' + r.error : ''), r.error ? 'error' : 'success');
+  }
+
+  // 4c: no audio format
+  total++;
+  setProgress('Test ' + total + ': no audio format');
+  {
+    const r = await callAPI(ENDPOINTS.sgp, {
+      model: 'mimo-v2.5-tts-voicedesign',
+      messages: [{ role: 'user', content: VOICE_DESC }, { role: 'assistant', content: testText }],
+    });
+    log(sec4, 'no audio format: ' + r.elapsed + 'ms' + (r.audioKB ? ' (' + r.audioKB + 'KB)' : '') + (r.error ? ' ERR: ' + r.error : ''), r.error ? 'error' : 'success');
+  }
+
+  // 4d: with voice param (like mimo-v2.5-tts)
+  total++;
+  setProgress('Test ' + total + ': with voice param');
+  {
+    const r = await callAPI(ENDPOINTS.sgp, {
+      model: 'mimo-v2.5-tts-voicedesign',
+      messages: [{ role: 'user', content: VOICE_DESC }, { role: 'assistant', content: testText }],
+      audio: { format: 'wav', voice: 'mimo_default' },
+    });
+    log(sec4, 'with voice param: ' + r.elapsed + 'ms' + (r.audioKB ? ' (' + r.audioKB + 'KB)' : '') + (r.error ? ' ERR: ' + r.error : ''), r.error ? 'error' : 'success');
+  }
+
+  // 4e: temperature param
+  total++;
+  setProgress('Test ' + total + ': with temperature');
+  {
+    const r = await callAPI(ENDPOINTS.sgp, {
+      model: 'mimo-v2.5-tts-voicedesign',
+      messages: [{ role: 'user', content: VOICE_DESC }, { role: 'assistant', content: testText }],
+      audio: { format: 'wav' },
+      temperature: 0.5,
+    });
+    log(sec4, 'with temperature=0.5: ' + r.elapsed + 'ms' + (r.audioKB ? ' (' + r.audioKB + 'KB)' : '') + (r.error ? ' ERR: ' + r.error : ''), r.error ? 'error' : 'success');
+  }
+
+  setProgress('Benchmark complete! ' + total + ' tests run.');
+  document.getElementById('runBtn').disabled = false;
+  document.getElementById('runRegionBtn').disabled = false;
+}
+
+// Auto-fill key from sessionStorage
+document.addEventListener('DOMContentLoaded', () => {
+  const key = sessionStorage.getItem('mimo_api_key');
+  if (key) document.getElementById('apiKey').value = key;
+});
+</script>
+</body>
+</html>

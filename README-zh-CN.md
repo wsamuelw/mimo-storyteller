@@ -16,7 +16,7 @@ MiMo-V2.5 TTS 限时免费——所以我做了一个多角色故事讲述器。
 - 额度有效期 40 天 · 折扣即时生效
 - 解锁 MiMo-V2.5 及完整模型阵容
 
-![MiMo Invite](images/mimo-invite.png)
+![MiMo Invite](images/RRJPZE.png)
 
 ---
 

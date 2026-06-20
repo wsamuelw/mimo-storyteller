@@ -16,7 +16,7 @@ Sign up at [platform.xiaomimimo.com](https://platform.xiaomimimo.com) with invit
 - Credits valid 40 days · Discount applies instantly
 - Unlock MiMo-V2.5 and the full model lineup
 
-![MiMo Invite](images/mimo-invite.png)
+![MiMo Invite](images/RRJPZE.png)
 
 ---
 
