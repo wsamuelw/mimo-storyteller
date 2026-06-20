@@ -11,7 +11,7 @@ MiMo-V2.5 TTS is free for a limited time — so I built a multi-character storyt
 
 ### Get Free API Credits
 
-Sign up at [platform.xiaomimimo.com](https://platform.xiaomimimo.com) with invite code **RRJPZE** — get $2 in free credits plus 10% off your first order.
+Sign up at [platform.xiaomimimo.com](https://platform.xiaomimimo.com?ref=RRJPZE) with invite code **RRJPZE** — get $2 in free credits plus 10% off your first order.
 
 - Credits valid 40 days · Discount applies instantly
 - Unlock MiMo-V2.5 and the full model lineup

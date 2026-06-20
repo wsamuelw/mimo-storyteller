@@ -11,7 +11,7 @@ MiMo-V2.5 TTS 限时免费——所以我做了一个多角色故事讲述器。
 
 ### 免费获取 API 额度
 
-在 [platform.xiaomimimo.com](https://platform.xiaomimimo.com) 注册时使用邀请码 **RRJPZE**，即可获得 $2 免费额度加首单 9 折优惠。
+在 [platform.xiaomimimo.com](https://platform.xiaomimimo.com?ref=RRJPZE) 注册时使用邀请码 **RRJPZE**，即可获得 $2 免费额度加首单 9 折优惠。
 
 - 额度有效期 40 天 · 折扣即时生效
 - 解锁 MiMo-V2.5 及完整模型阵容
